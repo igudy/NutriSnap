@@ -1,19 +1,13 @@
-// module.exports = function (api) {
-//   api.cache(true);
-//   let plugins = [];
-
-//   plugins.push('react-native-worklets/plugin');
-
-//   return {
-//     presets: [['babel-preset-expo', { jsxImportSource: 'nativewind' }], 'nativewind/babel'],
-
-//     plugins,
-//   };
-// };
-
 module.exports = function (api) {
   api.cache(true);
   return {
-    presets: [['babel-preset-expo', { jsxImportSource: 'nativewind' }], 'nativewind/babel'],
+    presets: [
+      "babel-preset-expo",
+      "nativewind/babel",
+    ],
+    plugins: [
+      // NOTE: react-native-reanimated/plugin must be listed last
+      "react-native-reanimated/plugin",
+    ],
   };
 };

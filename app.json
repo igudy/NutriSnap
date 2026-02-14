@@ -3,6 +3,7 @@
     "name": "NutriSnap",
     "slug": "NutriSnap",
     "version": "1.0.0",
+    "scheme": "nutrisnap",
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
@@ -11,6 +12,7 @@
       "tsconfigPaths": true
     },
     "plugins": [
+      "expo-router",
       "expo-font",
       "expo-asset"
     ],

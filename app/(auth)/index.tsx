@@ -1,6 +1,7 @@
 import { View, Text, Pressable } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import VectorLine from '@/assets/food/vectorLine.svg';
 import FoodLeft from '@/assets/food/foodLeft.svg';
 import FoodCenter from '@/assets/food/foodCenter.svg';
@@ -18,12 +19,13 @@ export default function HomeScreen() {
       <StatusBar style="light" />
 
       {/* Background Vector Lines */}
-      <View className="absolute inset-0">
-        <VectorLine width="100%" height="100%" preserveAspectRatio="xMidYMid slice" />
+      <View className="absolute inset-0" style={{ zIndex: 0 }}>
+        <VectorLine width="100%" height="100%" preserveAspectRatio="xMidYMin slice" />
       </View>
 
       {/* Content */}
-      <View className="flex-1 px-6">
+      <SafeAreaView className="flex-1" style={{ zIndex: 1 }}>
+        <View className="flex-1 px-6">
         {/* Title */}
         <View className="items-center pt-20">
           <Text className="text-white text-4xl font-jakarta-bold">
@@ -97,7 +99,8 @@ export default function HomeScreen() {
             </LinearGradient>
           </Pressable>
         </View>
-      </View>
+        </View>
+      </SafeAreaView>
     </View>
   );
 }
