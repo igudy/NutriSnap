@@ -5,7 +5,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import Avatar1 from '@/assets/food/avatar1.svg';
-import Avatar2 from '@/assets/food/avatar2.svg';
 import Avatar3 from '@/assets/food/avatar3.svg';
 import Avatar4 from '@/assets/food/avatar4.svg';
 import Avatar5 from '@/assets/food/avatar5.svg';
@@ -16,7 +15,7 @@ import Avatar9 from '@/assets/food/avatar9.svg';
 
 const avatars = [
   { id: 1, Component: Avatar1 },
-  { id: 2, Component: Avatar2 },
+  { id: 2, Component: Avatar9 },
   { id: 3, Component: Avatar3 },
   { id: 4, Component: Avatar4 },
   { id: 5, Component: Avatar5 },

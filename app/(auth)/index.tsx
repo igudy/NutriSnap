@@ -1,14 +1,25 @@
-import { View, Text, Pressable, ScrollView, Image, FlatList, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  Pressable,
+  ScrollView,
+  Image,
+  FlatList,
+  Dimensions,
+  Animated,
+} from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { useRef } from 'react';
 import VectorLine from '@/assets/food/vectorLine.svg';
 import CheckBox from '@/assets/food/checkBox.svg';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const ITEM_WIDTH = 300;
-const ITEM_SPACING = (SCREEN_WIDTH - ITEM_WIDTH) / 2;
+const ITEM_WIDTH = 280; // Slightly reduced to show more of side items
+const SIDE_ITEM_VISIBLE = 10; // How much of side items is visible
+const ITEM_SPACING = (SCREEN_WIDTH - ITEM_WIDTH) / 2; // This creates the peek effect
 
 const foodImages = [
   { id: 1, source: require('@/assets/food/foodLeft.png') },
@@ -18,10 +29,18 @@ const foodImages = [
 
 export default function HomeScreen() {
   const router = useRouter();
+  const flatListRef = useRef<FlatList>(null);
+  const scrollX = useRef(new Animated.Value(0)).current;
 
   const handleGetStarted = () => {
     router.push('/(auth)/avatar-selection');
   };
+
+  const getItemLayout = (_: any, index: number) => ({
+    length: ITEM_WIDTH,
+    offset: ITEM_WIDTH * index,
+    index,
+  });
 
   return (
     <View className="flex-1" style={{ backgroundColor: '#E34F00' }}>
@@ -46,40 +65,75 @@ export default function HomeScreen() {
 
             {/* Food Images Carousel */}
             <View className="items-center justify-center" style={{ marginTop: -60, height: 400 }}>
-              <FlatList
+              <Animated.FlatList
+                ref={flatListRef}
                 data={foodImages}
                 horizontal
-                pagingEnabled
                 showsHorizontalScrollIndicator={false}
                 snapToInterval={ITEM_WIDTH}
+                snapToAlignment="start"
                 decelerationRate="fast"
+                initialScrollIndex={1}
+                getItemLayout={getItemLayout}
                 contentContainerStyle={{
-                  paddingHorizontal: ITEM_SPACING,
+                  paddingHorizontal: ITEM_SPACING - SIDE_ITEM_VISIBLE / 2,
                 }}
-                renderItem={({ item }) => (
-                  <View
-                    style={{
-                      width: ITEM_WIDTH,
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }}>
-                    <View
+                onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
+                  useNativeDriver: true,
+                })}
+                scrollEventThrottle={16}
+                renderItem={({ item, index }) => {
+                  const inputRange = [
+                    (index - 1) * ITEM_WIDTH,
+                    index * ITEM_WIDTH,
+                    (index + 1) * ITEM_WIDTH,
+                  ];
+
+                  const scale = scrollX.interpolate({
+                    inputRange,
+                    outputRange: [0.8, 1, 0.8],
+                    extrapolate: 'clamp',
+                  });
+
+                  const translateY = scrollX.interpolate({
+                    inputRange,
+                    outputRange: [30, 0, 30],
+                    extrapolate: 'clamp',
+                  });
+
+                  const opacity = scrollX.interpolate({
+                    inputRange,
+                    outputRange: [0.6, 1, 0.6],
+                    extrapolate: 'clamp',
+                  });
+
+                  return (
+                    <Animated.View
                       style={{
-                        width: 300,
-                        height: 300,
-                        borderRadius: 30,
-                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                        width: ITEM_WIDTH,
                         justifyContent: 'center',
                         alignItems: 'center',
+                        transform: [{ scale }, { translateY }],
+                        opacity,
                       }}>
-                      <Image
-                        source={item.source}
-                        style={{ width: 280, height: 280 }}
-                        resizeMode="contain"
-                      />
-                    </View>
-                  </View>
-                )}
+                      <View
+                        style={{
+                          width: 260,
+                          height: 260,
+                          borderRadius: 130,
+                          backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                        }}>
+                        <Image
+                          source={item.source}
+                          style={{ width: 240, height: 240 }}
+                          resizeMode="contain"
+                        />
+                      </View>
+                    </Animated.View>
+                  );
+                }}
                 keyExtractor={(item) => item.id.toString()}
               />
 
