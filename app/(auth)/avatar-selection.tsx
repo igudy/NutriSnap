@@ -45,10 +45,8 @@ export default function AvatarSelectionScreen() {
       <View style={{ backgroundColor: '#E34F00' }} className="pt-2">
         <SafeAreaView edges={['top']}>
           <View className="px-6 pb-8">
-            <Text className="text-white text-3xl font-jakarta-bold text-center mb-4">
-              Nutri-Snap
-            </Text>
-            <Text className="text-white text-2xl font-jakarta-semibold text-center">
+            <Text className="mb-4 text-center font-sans-bold text-3xl text-white">Nutri-Snap</Text>
+            <Text className="text-center font-sans-semibold text-2xl text-white">
               Let's know you
             </Text>
           </View>
@@ -59,12 +57,12 @@ export default function AvatarSelectionScreen() {
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <View className="px-6 py-8">
           {/* Select Avatar Title */}
-          <Text className="text-gray-600 text-base font-jakarta-medium text-center mb-6">
+          <Text className="mb-6 text-center font-sans-medium text-base text-gray-600">
             Select Avatar
           </Text>
 
           {/* Avatar Grid */}
-          <View className="flex-row flex-wrap justify-center gap-4 mb-8">
+          <View className="mb-8 flex-row flex-wrap justify-center gap-4">
             {avatars.map((avatar) => {
               const AvatarComponent = avatar.Component;
               const isSelected = selectedAvatar === avatar.id;
@@ -73,8 +71,7 @@ export default function AvatarSelectionScreen() {
                 <Pressable
                   key={avatar.id}
                   onPress={() => setSelectedAvatar(avatar.id)}
-                  className="relative"
-                >
+                  className="relative">
                   {/* Avatar Circle */}
                   <View
                     style={{
@@ -86,8 +83,7 @@ export default function AvatarSelectionScreen() {
                       alignItems: 'center',
                       borderWidth: isSelected ? 3 : 0,
                       borderColor: isSelected ? '#840404' : 'transparent',
-                    }}
-                  >
+                    }}>
                     <AvatarComponent width={80} height={80} />
                   </View>
 
@@ -106,11 +102,8 @@ export default function AvatarSelectionScreen() {
                         alignItems: 'center',
                         borderWidth: 2,
                         borderColor: 'white',
-                      }}
-                    >
-                      <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>
-                        ✓
-                      </Text>
+                      }}>
+                      <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>✓</Text>
                     </View>
                   )}
                 </Pressable>
@@ -125,7 +118,7 @@ export default function AvatarSelectionScreen() {
               onChangeText={setNickname}
               placeholder="Enter Nickname"
               placeholderTextColor="#9CA3AF"
-              className="border border-gray-300 rounded-lg px-4 py-4 font-jakarta text-base"
+              className="rounded-lg border border-gray-300 px-4 py-4 font-sans text-base"
               style={{ backgroundColor: 'white' }}
             />
           </View>
@@ -133,17 +126,13 @@ export default function AvatarSelectionScreen() {
           {/* Get Started Button */}
           <Pressable
             onPress={handleGetStarted}
-            className="overflow-hidden rounded-lg active:opacity-90"
-          >
+            className="overflow-hidden rounded-lg active:opacity-90">
             <LinearGradient
               colors={['#840404', '#5C0303']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
-              className="py-5 items-center"
-            >
-              <Text className="text-white text-lg font-jakarta-bold">
-                Get started
-              </Text>
+              className="items-center py-5">
+              <Text className="font-sans-bold text-lg text-white">Get started</Text>
             </LinearGradient>
           </Pressable>
         </View>

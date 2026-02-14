@@ -2,25 +2,9 @@ import '@/global.css';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import 'react-native-reanimated';
-import {
-  useFonts,
-  PlusJakartaSans_200ExtraLight,
-  PlusJakartaSans_300Light,
-  PlusJakartaSans_400Regular,
-  PlusJakartaSans_500Medium,
-  PlusJakartaSans_600SemiBold,
-  PlusJakartaSans_700Bold,
-  PlusJakartaSans_800ExtraBold,
-  PlusJakartaSans_200ExtraLight_Italic,
-  PlusJakartaSans_300Light_Italic,
-  PlusJakartaSans_400Regular_Italic,
-  PlusJakartaSans_500Medium_Italic,
-  PlusJakartaSans_600SemiBold_Italic,
-  PlusJakartaSans_700Bold_Italic,
-  PlusJakartaSans_800ExtraBold_Italic,
-} from '@expo-google-fonts/plus-jakarta-sans';
+import { useFonts } from 'expo-font';
 import { useColorScheme } from 'react-native';
 
 SplashScreen.preventAutoHideAsync();
@@ -33,20 +17,14 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   const [fontsLoaded, fontError] = useFonts({
-    PlusJakartaSans_200ExtraLight,
-    PlusJakartaSans_300Light,
-    PlusJakartaSans_400Regular,
-    PlusJakartaSans_500Medium,
-    PlusJakartaSans_600SemiBold,
-    PlusJakartaSans_700Bold,
-    PlusJakartaSans_800ExtraBold,
-    PlusJakartaSans_200ExtraLight_Italic,
-    PlusJakartaSans_300Light_Italic,
-    PlusJakartaSans_400Regular_Italic,
-    PlusJakartaSans_500Medium_Italic,
-    PlusJakartaSans_600SemiBold_Italic,
-    PlusJakartaSans_700Bold_Italic,
-    PlusJakartaSans_800ExtraBold_Italic,
+    'GoogleSans-Regular': require('../assets/fonts/googleSans/GoogleSans-Regular.ttf'),
+    'GoogleSans-Medium': require('../assets/fonts/googleSans/GoogleSans-Medium.ttf'),
+    'GoogleSans-SemiBold': require('../assets/fonts/googleSans/GoogleSans-SemiBold.ttf'),
+    'GoogleSans-Bold': require('../assets/fonts/googleSans/GoogleSans-Bold.ttf'),
+    'GoogleSans-Italic': require('../assets/fonts/googleSans/GoogleSans-Italic.ttf'),
+    'GoogleSans-MediumItalic': require('../assets/fonts/googleSans/GoogleSans-MediumItalic.ttf'),
+    'GoogleSans-SemiBoldItalic': require('../assets/fonts/googleSans/GoogleSans-SemiBoldItalic.ttf'),
+    'GoogleSans-BoldItalic': require('../assets/fonts/googleSans/GoogleSans-BoldItalic.ttf'),
   });
 
   useEffect(() => {
@@ -63,6 +41,7 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(auth)/index" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)/avatar-selection" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>
   );

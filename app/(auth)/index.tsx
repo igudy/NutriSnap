@@ -1,17 +1,26 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, ScrollView, Image, FlatList, Dimensions } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import VectorLine from '@/assets/food/vectorLine.svg';
-import FoodLeft from '@/assets/food/foodLeft.svg';
-import FoodCenter from '@/assets/food/foodCenter.svg';
-import FoodRight from '@/assets/food/foodRight.svg';
 import CheckBox from '@/assets/food/checkBox.svg';
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const ITEM_WIDTH = 300;
+const ITEM_SPACING = (SCREEN_WIDTH - ITEM_WIDTH) / 2;
+
+const foodImages = [
+  { id: 1, source: require('@/assets/food/foodLeft.png') },
+  { id: 2, source: require('@/assets/food/foodCenter.png') },
+  { id: 3, source: require('@/assets/food/foodRight.png') },
+];
+
 export default function HomeScreen() {
+  const router = useRouter();
+
   const handleGetStarted = () => {
-    // Navigation logic will go here
-    console.log('Get started pressed');
+    router.push('/(auth)/avatar-selection');
   };
 
   return (
@@ -25,81 +34,106 @@ export default function HomeScreen() {
 
       {/* Content */}
       <SafeAreaView className="flex-1" style={{ zIndex: 1 }}>
-        <View className="flex-1 px-6">
-        {/* Title */}
-        <View className="items-center pt-20">
-          <Text className="text-white text-4xl font-jakarta-bold">
-            Nutri-Snap
-          </Text>
-        </View>
+        <ScrollView
+          className="flex-1"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ flexGrow: 1 }}>
+          <View className="flex-1 px-6">
+            {/* Title */}
+            <View className="items-center pt-6">
+              <Text className="mb-20 mt-10 font-sans-bold text-4xl text-white">Nutri-Snap</Text>
+            </View>
 
-        {/* Food Images with Checkbox */}
-        <View className="flex-1 items-center justify-center -mt-10">
-          <View className="relative w-full items-center">
-            {/* Food Bowls Row */}
-            <View className="flex-row items-center justify-center w-full">
-              {/* Left Food */}
-              <View className="absolute left-0 -ml-16">
-                <FoodLeft width={180} height={180} />
-              </View>
+            {/* Food Images Carousel */}
+            <View className="items-center justify-center" style={{ marginTop: -60, height: 400 }}>
+              <FlatList
+                data={foodImages}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                snapToInterval={ITEM_WIDTH}
+                decelerationRate="fast"
+                contentContainerStyle={{
+                  paddingHorizontal: ITEM_SPACING,
+                }}
+                renderItem={({ item }) => (
+                  <View
+                    style={{
+                      width: ITEM_WIDTH,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                    <View
+                      style={{
+                        width: 300,
+                        height: 300,
+                        borderRadius: 30,
+                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                      }}>
+                      <Image
+                        source={item.source}
+                        style={{ width: 280, height: 280 }}
+                        resizeMode="contain"
+                      />
+                    </View>
+                  </View>
+                )}
+                keyExtractor={(item) => item.id.toString()}
+              />
 
-              {/* Center Food */}
-              <View className="z-10">
-                <FoodCenter width={240} height={240} />
-              </View>
-
-              {/* Right Food */}
-              <View className="absolute right-0 -mr-16">
-                <FoodRight width={180} height={180} />
+              {/* Checkbox below carousel */}
+              <View className="z-20" style={{ marginTop: -40 }}>
+                <CheckBox width={90} height={90} />
               </View>
             </View>
 
-            {/* Checkbox below center food */}
-            <View className="mt-4 z-20">
-              <CheckBox width={80} height={80} />
+            {/* Bottom Content */}
+            <View className="pb-10">
+              {/* Main Text */}
+              <View className="mb-4">
+                <Text className="text-center font-sans-bold text-4xl leading-tight text-white">
+                  No logging.
+                </Text>
+                <Text className="text-center font-sans-bold text-4xl leading-tight text-white">
+                  No hassle.
+                </Text>
+              </View>
+
+              {/* Subtitle */}
+              <View className="mb-6">
+                <Text className="text-center font-sans-medium text-base leading-relaxed text-white">
+                  Just snap a photo of your meal and{'\n'}
+                  let AI track your macros automatically.{'\n'}
+                  View your weekly nutrition at a glance.
+                </Text>
+              </View>
+
+              {/* Get Started Button */}
+              <Pressable
+                onPress={handleGetStarted}
+                className="overflow-hidden rounded-lg active:opacity-90"
+                style={{
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 8,
+                  elevation: 8,
+                }}>
+                <LinearGradient
+                  colors={['#A01F1F', '#6B0F0F']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  className="items-center justify-center py-5">
+                  <Text className="py-4 text-center font-sans-bold text-xl text-white">
+                    Get Started
+                  </Text>
+                </LinearGradient>
+              </Pressable>
             </View>
           </View>
-        </View>
-
-        {/* Bottom Content */}
-        <View className="pb-12">
-          {/* Main Text */}
-          <View className="mb-6">
-            <Text className="text-white text-5xl font-jakarta-bold text-center leading-tight">
-              No logging.
-            </Text>
-            <Text className="text-white text-5xl font-jakarta-bold text-center leading-tight">
-              No hassle.
-            </Text>
-          </View>
-
-          {/* Subtitle */}
-          <View className="mb-8">
-            <Text className="text-white text-base font-jakarta-medium text-center leading-relaxed px-2">
-              Just snap a photo of your meal and{'\n'}
-              let AI track your macros automatically.{'\n'}
-              View your weekly nutrition at a glance.
-            </Text>
-          </View>
-
-          {/* Get Started Button */}
-          <Pressable
-            onPress={handleGetStarted}
-            className="overflow-hidden rounded-full active:opacity-90"
-          >
-            <LinearGradient
-              colors={['#840404', '#840404']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              className="py-5 items-center"
-            >
-              <Text className="text-white text-xl font-jakarta-bold">
-                Get started
-              </Text>
-            </LinearGradient>
-          </Pressable>
-        </View>
-        </View>
+        </ScrollView>
       </SafeAreaView>
     </View>
   );
