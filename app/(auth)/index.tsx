@@ -1,109 +1,243 @@
-import { View, Text, Pressable, ScrollView, Image } from 'react-native';
+import { useRef, useState } from 'react';
+import {
+  View,
+  Text,
+  Pressable,
+  Image,
+  Dimensions,
+  Animated,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
+} from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import VectorLine from '@/assets/food/vectorLine.svg';
-import CheckBox from '@/assets/food/checkBox.svg';
+import CheckBadge from '@/assets/food/checkBox.svg';
+import { font, radii, shadow } from '@/lib/theme';
+import { useThemeColors } from '@/lib/theme-context';
 
-export default function HomeScreen() {
+const { width } = Dimensions.get('window');
+
+const slides = [
+  { id: 'left', image: require('@/assets/food/foodLeft.png') },
+  { id: 'bowl', image: require('@/assets/food/foodCenter.png') },
+  { id: 'right', image: require('@/assets/food/foodRight.png') },
+];
+
+const INITIAL_INDEX = 1;
+
+const CARD_WIDTH = Math.round(width * 0.62);
+const SPACING = Math.round(width * 0.06);
+const ITEM_SIZE = CARD_WIDTH + SPACING;
+const SIDE_PADDING = (width - CARD_WIDTH) / 2;
+
+export default function LandingScreen() {
   const router = useRouter();
+  const colors = useThemeColors();
+  const [active, setActive] = useState(INITIAL_INDEX);
+  const scrollRef = useRef<any>(null);
+  const scrollX = useRef(new Animated.Value(INITIAL_INDEX * ITEM_SIZE)).current;
 
   const handleGetStarted = () => {
     router.push('/(auth)/avatar-selection');
   };
 
+  const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const page = Math.round(e.nativeEvent.contentOffset.x / ITEM_SIZE);
+    if (page !== active) setActive(page);
+  };
+
   return (
-    <View className="flex-1" style={{ backgroundColor: '#E34F00' }}>
+    <View className="flex-1" style={{ backgroundColor: colors.brand }}>
       <StatusBar style="light" />
 
-      {/* Background Vector Lines */}
-      <View className="absolute inset-0" style={{ zIndex: 0 }}>
+      {/* Soft vector lines on the warm orange */}
+      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: 0.35 }}>
         <VectorLine width="100%" height="100%" preserveAspectRatio="xMidYMin slice" />
       </View>
 
-      {/* Content */}
-      <SafeAreaView className="flex-1" style={{ zIndex: 1 }}>
-        <ScrollView
-          className="flex-1"
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ flexGrow: 1 }}>
-          <View className="flex-1 px-6">
-            {/* Title */}
-            <View className="items-center pt-6">
-              <Text className="mb-6 mt-4 font-sans-bold text-4xl text-white">Nutri-Snap</Text>
-            </View>
+      <SafeAreaView className="flex-1" edges={['top', 'bottom']}>
+        {/* Wordmark */}
+        <View className="items-center pt-2">
+          <Text
+            style={{
+              fontFamily: font.bold,
+              fontSize: 22,
+              color: '#fff',
+              letterSpacing: -0.3,
+            }}>
+            Nutri-Snap
+          </Text>
+        </View>
 
-            {/* Single Centered Food Image */}
-            <View className="items-center">
-              <View
-                style={{
-                  width: 280,
-                  height: 280,
-                  borderRadius: 30,
-                  backgroundColor: 'rgba(255, 180, 100, 0.35)',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <Image
-                  source={require('@/assets/food/foodCenter.png')}
-                  style={{ width: 260, height: 260 }}
-                  resizeMode="contain"
-                />
-              </View>
+        {/* Arc carousel */}
+        <View style={{ marginTop: 28 }}>
+          <Animated.ScrollView
+            ref={scrollRef}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            snapToInterval={ITEM_SIZE}
+            decelerationRate="fast"
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+              { useNativeDriver: true, listener: handleScroll }
+            )}
+            scrollEventThrottle={16}
+            contentContainerStyle={{
+              paddingHorizontal: SIDE_PADDING,
+              paddingVertical: 12,
+            }}>
+            {slides.map((s, i) => {
+              const inputRange = [
+                (i - 1) * ITEM_SIZE,
+                i * ITEM_SIZE,
+                (i + 1) * ITEM_SIZE,
+              ];
+              const scale = scrollX.interpolate({
+                inputRange,
+                outputRange: [0.82, 1, 0.82],
+                extrapolate: 'clamp',
+              });
+              const translateY = scrollX.interpolate({
+                inputRange,
+                outputRange: [36, 0, 36],
+                extrapolate: 'clamp',
+              });
+              const rotate = scrollX.interpolate({
+                inputRange,
+                outputRange: ['-10deg', '0deg', '10deg'],
+                extrapolate: 'clamp',
+              });
+              const opacity = scrollX.interpolate({
+                inputRange,
+                outputRange: [0.7, 1, 0.7],
+                extrapolate: 'clamp',
+              });
 
-              {/* Checkbox below image */}
-              <View style={{ marginTop: -20 }}>
-                <CheckBox width={70} height={70} />
-              </View>
-            </View>
+              return (
+                <Animated.View
+                  key={s.id}
+                  style={{
+                    width: CARD_WIDTH,
+                    marginHorizontal: SPACING / 2,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transform: [{ scale }, { translateY }, { rotate }],
+                    opacity,
+                  }}>
+                  {/* Placemat card behind the plate */}
+                  <View
+                    style={{
+                      width: CARD_WIDTH,
+                      height: CARD_WIDTH,
+                      borderRadius: 28,
+                      backgroundColor: 'rgba(255,255,255,0.18)',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                    <Image
+                      source={s.image}
+                      style={{ width: CARD_WIDTH * 0.95, height: CARD_WIDTH * 0.95 }}
+                      resizeMode="contain"
+                    />
+                  </View>
+                </Animated.View>
+              );
+            })}
+          </Animated.ScrollView>
 
-            {/* Bottom Content */}
-            <View className="mt-4">
-              {/* Main Text */}
-              <View className="mb-4">
-                <Text className="text-center font-sans-bold text-4xl leading-tight text-white">
-                  No logging.
-                </Text>
-                <Text className="text-center font-sans-bold text-4xl leading-tight text-white">
-                  No hassle.
-                </Text>
-              </View>
-
-              {/* Subtitle */}
-              <View>
-                <Text className="text-center font-sans-medium text-base leading-relaxed text-white">
-                  Just snap a photo of your meal and{'\n'}
-                  let AI track your macros automatically.{'\n'}
-                  View your weekly nutrition at a glance.
-                </Text>
-              </View>
-            </View>
+          {/* Check badge tucked under the center plate */}
+          <View style={{ alignItems: 'center', marginTop: -24 }} pointerEvents="none">
+            <CheckBadge width={64} height={64} />
           </View>
-        </ScrollView>
 
-        {/* Get Started Button - Pinned to bottom */}
-        <View className="px-6 pb-4 pt-4">
+          {/* Pagination */}
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              gap: 6,
+              marginTop: 16,
+            }}>
+            {slides.map((_, i) => {
+              const isActive = i === active;
+              return (
+                <Pressable
+                  key={i}
+                  onPress={() => scrollRef.current?.scrollTo({ x: i * ITEM_SIZE, animated: true })}
+                  style={{
+                    width: isActive ? 22 : 6,
+                    height: 6,
+                    borderRadius: 3,
+                    backgroundColor: isActive ? '#fff' : 'rgba(255,255,255,0.4)',
+                  }}
+                />
+              );
+            })}
+          </View>
+        </View>
+
+        {/* Copy */}
+        <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 28 }}>
+          <Text
+            style={{
+              fontFamily: font.bold,
+              fontSize: 44,
+              color: '#fff',
+              textAlign: 'center',
+              lineHeight: 50,
+              letterSpacing: -0.8,
+            }}>
+            No logging.
+          </Text>
+          <Text
+            style={{
+              fontFamily: font.bold,
+              fontSize: 44,
+              color: '#fff',
+              textAlign: 'center',
+              lineHeight: 50,
+              letterSpacing: -0.8,
+            }}>
+            No hassle.
+          </Text>
+
+          <Text
+            style={{
+              fontFamily: font.medium,
+              fontSize: 15,
+              color: 'rgba(255,255,255,0.9)',
+              textAlign: 'center',
+              lineHeight: 22,
+              marginTop: 18,
+            }}>
+            Just snap a photo of your meal and let AI{'\n'}
+            track your macros automatically.{'\n'}
+            View your weekly nutrition at a glance.
+          </Text>
+        </View>
+
+        {/* CTA */}
+        <View className="px-6 pb-4">
           <Pressable
             onPress={handleGetStarted}
-            className="overflow-hidden rounded-2xl active:opacity-90"
             style={{
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              shadowRadius: 8,
-              elevation: 8,
+              borderRadius: radii.lg,
+              backgroundColor: colors.brandDeep,
+              paddingVertical: 20,
+              alignItems: 'center',
+              ...shadow.deep,
             }}>
-            <LinearGradient
-              colors={['#A01F1F', '#6B0F0F']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={{ borderRadius: 16 }}
-              className="items-center justify-center py-5">
-              <Text className="py-4 text-center font-sans-bold text-lg text-white">
-                Get Started
-              </Text>
-            </LinearGradient>
+            <Text
+              style={{
+                fontFamily: font.bold,
+                fontSize: 17,
+                color: '#fff',
+                letterSpacing: 0.2,
+              }}>
+              Get started
+            </Text>
           </Pressable>
         </View>
       </SafeAreaView>

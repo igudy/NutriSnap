@@ -1,11 +1,11 @@
 import '@/global.css';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, DefaultTheme, ThemeProvider as NavThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { useFonts } from 'expo-font';
-import { useColorScheme } from 'react-native';
+import { ThemeProvider, useTheme } from '@/lib/theme-context';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -14,8 +14,6 @@ export const unstable_settings = {
 };
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
   const [fontsLoaded, fontError] = useFonts({
     'GoogleSans-Regular': require('../assets/fonts/googleSans/GoogleSans-Regular.ttf'),
     'GoogleSans-Medium': require('../assets/fonts/googleSans/GoogleSans-Medium.ttf'),
@@ -38,7 +36,16 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider>
+      <ThemedStack />
+    </ThemeProvider>
+  );
+}
+
+function ThemedStack() {
+  const { isDark } = useTheme();
+  return (
+    <NavThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(auth)/index" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)/avatar-selection" options={{ headerShown: false }} />
@@ -52,6 +59,6 @@ export default function RootLayout() {
           options={{ headerShown: false, animation: 'slide_from_right' }}
         />
       </Stack>
-    </ThemeProvider>
+    </NavThemeProvider>
   );
 }

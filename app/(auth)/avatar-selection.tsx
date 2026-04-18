@@ -1,10 +1,8 @@
 import { View, Text, Pressable, TextInput, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
-import VectorLine from '@/assets/food/vectorLine.svg';
 import Avatar1 from '@/assets/food/avatar1.svg';
 import Avatar3 from '@/assets/food/avatar3.svg';
 import Avatar4 from '@/assets/food/avatar4.svg';
@@ -13,6 +11,9 @@ import Avatar6 from '@/assets/food/avatar6.svg';
 import Avatar7 from '@/assets/food/avatar7.svg';
 import Avatar8 from '@/assets/food/avatar8.svg';
 import Avatar9 from '@/assets/food/avatar9.svg';
+import { font, radii, shadow } from '@/lib/theme';
+import { useTheme, useThemeColors } from '@/lib/theme-context';
+import { ArrowLeftIcon, ArrowRightIcon, CheckIcon } from '@/lib/icons';
 
 const avatars = [
   { id: 1, Component: Avatar1 },
@@ -23,137 +24,265 @@ const avatars = [
   { id: 6, Component: Avatar6 },
   { id: 7, Component: Avatar7 },
   { id: 8, Component: Avatar8 },
-  { id: 9, Component: Avatar9 },
+];
+
+const goals = [
+  { id: 'lose', label: 'Lose weight', emoji: '\u{1F525}' },
+  { id: 'maintain', label: 'Stay balanced', emoji: '\u2696\uFE0F' },
+  { id: 'gain', label: 'Build muscle', emoji: '\u{1F4AA}' },
+  { id: 'track', label: 'Just track', emoji: '\u{1F4DD}' },
 ];
 
 export default function AvatarSelectionScreen() {
   const router = useRouter();
+  const colors = useThemeColors();
+  const { isDark } = useTheme();
   const [selectedAvatar, setSelectedAvatar] = useState<number>(2);
   const [nickname, setNickname] = useState('');
+  const [selectedGoal, setSelectedGoal] = useState<string>('maintain');
 
   const handleGetStarted = () => {
     router.replace('/(tabs)');
   };
 
   return (
-    <View className="flex-1 bg-white">
-      <StatusBar style="light" />
+    <View className="flex-1" style={{ backgroundColor: colors.cream }}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
 
-      {/* Orange Header */}
-      <View style={{ backgroundColor: '#E34F00' }} className="relative pt-2">
-        {/* Background Vector Lines */}
-        <View className="absolute inset-0" style={{ zIndex: 0 }}>
-          <VectorLine width="100%" height="100%" preserveAspectRatio="xMidYMin slice" />
+      <SafeAreaView className="flex-1" edges={['top', 'bottom']}>
+        {/* Top bar */}
+        <View className="flex-row items-center justify-between px-5 pt-2">
+          <Pressable
+            onPress={() => router.back()}
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: 22,
+              backgroundColor: colors.surface,
+              justifyContent: 'center',
+              alignItems: 'center',
+              ...shadow.soft,
+            }}>
+            <ArrowLeftIcon size={18} color={colors.text} />
+          </Pressable>
+
+          <View className="flex-row items-center" style={{ gap: 6 }}>
+            <View style={{ width: 28, height: 4, borderRadius: 2, backgroundColor: colors.brand }} />
+            <View style={{ width: 28, height: 4, borderRadius: 2, backgroundColor: colors.border }} />
+          </View>
+
+          <Text style={{ fontFamily: font.medium, fontSize: 13, color: colors.textMuted }}>
+            Step 1 / 2
+          </Text>
         </View>
 
-        <SafeAreaView edges={['top']} style={{ zIndex: 1 }}>
-          <View className="px-6 pb-12">
-            <Text className="mb-4 text-center font-sans-bold text-3xl text-white">Nutri-Snap</Text>
-            <Text className="text-center font-sans-semibold text-2xl text-white">
-              Let{'\u2019'}s know you
+        <ScrollView
+          className="flex-1"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 24 }}>
+          {/* Title */}
+          <View className="px-6 pt-6">
+            <Text
+              style={{
+                fontFamily: font.bold,
+                fontSize: 32,
+                color: colors.text,
+                letterSpacing: -0.5,
+                lineHeight: 38,
+              }}>
+              Let{'\u2019'}s make it yours.
+            </Text>
+            <Text
+              style={{
+                fontFamily: font.regular,
+                fontSize: 15,
+                color: colors.textMuted,
+                marginTop: 8,
+                lineHeight: 22,
+              }}>
+              Pick an avatar, drop a name, and tell us{'\n'}what matters most to you.
             </Text>
           </View>
-        </SafeAreaView>
-      </View>
 
-      <ScrollView
-        className="flex-1"
-        showsVerticalScrollIndicator={false}
-        style={{
-          marginTop: -24,
-          borderTopLeftRadius: 24,
-          borderTopRightRadius: 24,
-          backgroundColor: 'white',
-        }}>
-        <View className="px-6 py-8">
-          <Text className="mb-6 text-center font-sans-medium text-base text-gray-600">
-            Select Avatar
-          </Text>
+          {/* Avatar grid */}
+          <View style={{ marginTop: 28 }}>
+            <View className="flex-row items-center justify-between px-6 mb-4">
+              <Text style={{ fontFamily: font.semibold, fontSize: 13, color: colors.textMuted, letterSpacing: 1 }}>
+                AVATAR
+              </Text>
+              <Text style={{ fontFamily: font.medium, fontSize: 12, color: colors.brand }}>
+                Tap to select
+              </Text>
+            </View>
 
-          <View className="mb-8 flex-row flex-wrap justify-center gap-5">
-            {avatars.map((avatar) => {
-              const AvatarComponent = avatar.Component;
-              const isSelected = selectedAvatar === avatar.id;
-
-              return (
-                <Pressable
-                  key={avatar.id}
-                  onPress={() => setSelectedAvatar(avatar.id)}
-                  className="relative">
-                  <View
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: 20, gap: 12 }}>
+              {avatars.map((avatar) => {
+                const AvatarComponent = avatar.Component;
+                const isSelected = selectedAvatar === avatar.id;
+                return (
+                  <Pressable
+                    key={avatar.id}
+                    onPress={() => setSelectedAvatar(avatar.id)}
                     style={{
-                      width: 100,
-                      height: 100,
-                      borderRadius: 50,
-                      backgroundColor: '#FFE5D9',
+                      width: 96,
+                      height: 96,
+                      borderRadius: 48,
+                      backgroundColor: isSelected ? colors.brand : colors.surface,
                       justifyContent: 'center',
                       alignItems: 'center',
-                      borderWidth: isSelected ? 3 : 0,
-                      borderColor: isSelected ? '#840404' : 'transparent',
+                      ...(isSelected ? shadow.brand : shadow.soft),
+                      borderWidth: isSelected ? 0 : 1,
+                      borderColor: colors.borderSoft,
                     }}>
-                    <AvatarComponent width={90} height={90} />
-                  </View>
-
-                  {isSelected && (
                     <View
                       style={{
-                        position: 'absolute',
-                        top: -4,
-                        right: -4,
-                        width: 28,
-                        height: 28,
-                        borderRadius: 14,
-                        backgroundColor: '#E74C3C',
+                        width: 86,
+                        height: 86,
+                        borderRadius: 43,
+                        backgroundColor: isSelected ? '#FFE5D9' : colors.surfaceWarm,
                         justifyContent: 'center',
                         alignItems: 'center',
-                        borderWidth: 2,
-                        borderColor: 'white',
                       }}>
-                      <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>✓</Text>
+                      <AvatarComponent width={80} height={80} />
                     </View>
-                  )}
-                </Pressable>
-              );
-            })}
+                    {isSelected && (
+                      <View
+                        style={{
+                          position: 'absolute',
+                          bottom: -2,
+                          right: -2,
+                          width: 28,
+                          height: 28,
+                          borderRadius: 14,
+                          backgroundColor: colors.espresso,
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          borderWidth: 3,
+                          borderColor: colors.cream,
+                        }}>
+                        <CheckIcon size={14} />
+                      </View>
+                    )}
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
           </View>
 
-          {/* Nickname Input */}
-          <View>
-            <TextInput
-              value={nickname}
-              onChangeText={setNickname}
-              placeholder="Enter Nickname"
-              placeholderTextColor="#9CA3AF"
-              className="rounded-lg border border-gray-300 px-4 py-4 font-sans text-base"
-              style={{ backgroundColor: 'white' }}
-            />
+          {/* Nickname */}
+          <View className="px-6" style={{ marginTop: 32 }}>
+            <Text
+              style={{
+                fontFamily: font.semibold,
+                fontSize: 13,
+                color: colors.textMuted,
+                letterSpacing: 1,
+                marginBottom: 10,
+              }}>
+              NICKNAME
+            </Text>
+            <View
+              style={{
+                backgroundColor: colors.surface,
+                borderRadius: radii.lg,
+                borderWidth: 1,
+                borderColor: nickname ? colors.brand : colors.border,
+                paddingHorizontal: 18,
+                paddingVertical: 4,
+                ...shadow.soft,
+              }}>
+              <TextInput
+                value={nickname}
+                onChangeText={setNickname}
+                placeholder="What should we call you?"
+                placeholderTextColor={colors.textSubtle}
+                style={{
+                  fontFamily: font.medium,
+                  fontSize: 16,
+                  color: colors.text,
+                  paddingVertical: 16,
+                }}
+              />
+            </View>
           </View>
-        </View>
-      </ScrollView>
 
-      {/* Get Started Button - Pinned to bottom */}
-      <SafeAreaView edges={['bottom']} style={{ backgroundColor: 'white' }}>
-        <View className="px-6 pb-4 pt-4">
+          {/* Goals */}
+          <View className="px-6" style={{ marginTop: 28 }}>
+            <Text
+              style={{
+                fontFamily: font.semibold,
+                fontSize: 13,
+                color: colors.textMuted,
+                letterSpacing: 1,
+                marginBottom: 12,
+              }}>
+              YOUR GOAL
+            </Text>
+            <View className="flex-row flex-wrap" style={{ gap: 10 }}>
+              {goals.map((g) => {
+                const active = selectedGoal === g.id;
+                return (
+                  <Pressable
+                    key={g.id}
+                    onPress={() => setSelectedGoal(g.id)}
+                    style={{
+                      flexBasis: '48%',
+                      backgroundColor: active ? (isDark ? colors.brand : colors.espresso) : colors.surface,
+                      borderRadius: radii.lg,
+                      paddingVertical: 18,
+                      paddingHorizontal: 16,
+                      borderWidth: 1,
+                      borderColor: active ? (isDark ? colors.brand : colors.espresso) : colors.border,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 10,
+                      ...(active ? shadow.deep : shadow.soft),
+                    }}>
+                    <Text style={{ fontSize: 22 }}>{g.emoji}</Text>
+                    <Text
+                      style={{
+                        fontFamily: font.semibold,
+                        fontSize: 14,
+                        color: active ? '#fff' : colors.text,
+                        flex: 1,
+                      }}>
+                      {g.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+        </ScrollView>
+
+        {/* Primary CTA */}
+        <View className="px-6 pb-2 pt-4">
           <Pressable
             onPress={handleGetStarted}
-            className="overflow-hidden rounded-2xl active:opacity-90"
             style={{
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              shadowRadius: 8,
-              elevation: 8,
+              borderRadius: radii.pill,
+              backgroundColor: colors.brand,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              paddingVertical: 18,
+              paddingHorizontal: 24,
+              gap: 10,
+              ...shadow.brand,
             }}>
-            <LinearGradient
-              colors={['#A01F1F', '#6B0F0F']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={{ borderRadius: 16 }}
-              className="items-center justify-center py-5">
-              <Text className="py-4 text-center font-sans-bold text-lg text-white">
-                Get Started
-              </Text>
-            </LinearGradient>
+            <Text
+              style={{
+                fontFamily: font.bold,
+                fontSize: 17,
+                color: '#fff',
+                letterSpacing: 0.3,
+              }}>
+              Continue
+            </Text>
+            <ArrowRightIcon size={18} color="#fff" />
           </Pressable>
         </View>
       </SafeAreaView>

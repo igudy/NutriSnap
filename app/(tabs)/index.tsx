@@ -1,321 +1,512 @@
-import { View, Text, ScrollView, Image } from 'react-native';
+import { View, Text, ScrollView, Image, Pressable } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PieChart } from 'react-native-gifted-charts';
-import Svg, { Polyline } from 'react-native-svg';
-import VectorLine from '@/assets/food/vectorLine.svg';
+import { useRouter } from 'expo-router';
 import Avatar4 from '@/assets/food/avatar4.svg';
+import { font, radii, shadow } from '@/lib/theme';
+import { useThemeColors } from '@/lib/theme-context';
+import {
+  BellIcon,
+  FlameIcon,
+  TrendUpIcon,
+  SparkleIcon,
+  WaterDropIcon,
+  TargetIcon,
+  ChevronRightIcon,
+  BoltIcon,
+} from '@/lib/icons';
 
-const MACRO_COLORS = {
-  protein: '#2D6A4F',
-  carbs: '#52B788',
-  fats: '#F4A261',
-};
-
-function TrendUpIcon({ size = 24 }: { size?: number }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Polyline
-        points="23 6 13.5 15.5 8.5 10.5 1 18"
-        stroke="#16A34A"
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <Polyline
-        points="17 6 23 6 23 12"
-        stroke="#16A34A"
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
-}
-
-const cardStyle = {
-  backgroundColor: 'white',
-  borderRadius: 20,
-  padding: 24,
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.08,
-  shadowRadius: 12,
-  elevation: 4,
-};
-
-const dailyBreakdown = [
-  { day: 'Mon', meals: 1, kcal: 268, image: require('@/assets/food/foodCenter.png') },
-  { day: 'Tue', meals: 2, kcal: 268, image: require('@/assets/food/foodLeft.png') },
-  { day: 'Wed', meals: 2, kcal: 268, image: require('@/assets/food/foodRight.png') },
-  { day: 'Thu', meals: 2, kcal: 268, image: require('@/assets/food/foodCenter.png') },
-  { day: 'Fri', meals: 2, kcal: 268, image: require('@/assets/food/foodLeft.png') },
-  { day: 'Sat', meals: 2, kcal: 268, image: require('@/assets/food/foodRight.png') },
+const recentMeals = [
+  { day: 'Mon', meals: 1, kcal: 268, image: require('@/assets/food/foodCenter.png'), name: 'Breakfast bowl' },
+  { day: 'Tue', meals: 2, kcal: 412, image: require('@/assets/food/foodLeft.png'), name: 'Grilled salmon' },
+  { day: 'Wed', meals: 2, kcal: 528, image: require('@/assets/food/foodRight.png'), name: 'Pasta primavera' },
+  { day: 'Thu', meals: 2, kcal: 305, image: require('@/assets/food/foodCenter.png'), name: 'Avocado toast' },
 ];
 
 export default function HomeScreen() {
+  const router = useRouter();
+  const colors = useThemeColors();
+  const MACRO_COLORS = {
+    protein: colors.protein,
+    carbs: colors.carbs,
+    fats: colors.fats,
+  };
   const username = 'Meeday';
-  const totalKcal = 0;
-  const protein = { grams: 10, percent: 10 };
-  const carbs = { grams: 74, percent: 76 };
-  const fats = { grams: 14, percent: 14 };
+  const totalKcal = 1248;
+  const goalKcal = 2000;
+  const protein = { grams: 87, percent: 32 };
+  const carbs = { grams: 156, percent: 52 };
+  const fats = { grams: 42, percent: 16 };
+  const streak = 12;
+  const water = { cups: 5, goal: 8 };
+  const progress = Math.min(totalKcal / goalKcal, 1);
 
-  const pieData =
-    totalKcal <= 0
-      ? [
-          { value: protein.percent || 1, color: MACRO_COLORS.protein },
-          { value: carbs.percent || 1, color: MACRO_COLORS.carbs },
-          { value: fats.percent || 1, color: MACRO_COLORS.fats },
-        ]
-      : [
-          { value: protein.percent, color: MACRO_COLORS.protein },
-          { value: carbs.percent, color: MACRO_COLORS.carbs },
-          { value: fats.percent, color: MACRO_COLORS.fats },
-        ];
+  const pieData = [
+    { value: protein.percent, color: MACRO_COLORS.protein },
+    { value: carbs.percent, color: MACRO_COLORS.carbs },
+    { value: fats.percent, color: MACRO_COLORS.fats },
+  ];
 
   const today = new Date();
-  const startOfWeek = new Date(today);
-  startOfWeek.setDate(today.getDate() - today.getDay());
-  const endOfWeek = new Date(startOfWeek);
-  endOfWeek.setDate(startOfWeek.getDate() + 6);
+  const dateLabel = today.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  });
 
-  const formatDate = (d: Date) =>
-    d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
-  const weekRange = `${formatDate(startOfWeek)} - ${formatDate(endOfWeek)}`;
+  const greeting = (() => {
+    const hr = today.getHours();
+    if (hr < 12) return 'Good morning';
+    if (hr < 18) return 'Good afternoon';
+    return 'Good evening';
+  })();
 
   return (
-    <View className="flex-1" style={{ backgroundColor: '#F9FAFB' }}>
-      <StatusBar style="light" />
+    <View className="flex-1" style={{ backgroundColor: colors.cream }}>
+      <StatusBar style="dark" />
 
-      {/* Orange Header */}
-      <View style={{ backgroundColor: '#E34F00' }} className="relative">
-        <View className="absolute inset-0" style={{ zIndex: 0 }}>
-          <VectorLine width="100%" height="100%" preserveAspectRatio="xMidYMin slice" />
-        </View>
+      {/* Subtle warm wash at the very top */}
+      <View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 260,
+          backgroundColor: colors.brand,
+          opacity: 0.08,
+        }}
+      />
 
-        <SafeAreaView edges={['top']} style={{ zIndex: 1 }}>
-          <View className="flex-row items-center px-6 pb-[12rem] pt-4">
+      <SafeAreaView edges={['top']}>
+        {/* Top strip: greeting + bell */}
+        <View className="flex-row items-center justify-between px-5 pt-3 pb-5">
+          <View className="flex-row items-center" style={{ gap: 12 }}>
             <View
               style={{
-                width: 56,
-                height: 56,
-                borderRadius: 28,
-                backgroundColor: '#FFE5D9',
+                width: 46,
+                height: 46,
+                borderRadius: 23,
+                backgroundColor: colors.surfaceWarm,
                 justifyContent: 'center',
                 alignItems: 'center',
-                borderWidth: 2,
-                borderColor: 'rgba(255,255,255,0.4)',
               }}>
-              <Avatar4 width={50} height={50} />
+              <Avatar4 width={42} height={42} />
             </View>
-
-            <View className="ml-4 flex-1">
-              <Text className="font-sans-bold text-2xl text-white">Hello {username}</Text>
-              <Text className="mt-1 font-sans text-sm" style={{ color: 'rgba(255,255,255,0.8)' }}>
-                How are you doing today?
+            <View>
+              <Text style={{ fontFamily: font.regular, fontSize: 12, color: colors.textMuted }}>
+                {greeting}
+              </Text>
+              <Text style={{ fontFamily: font.bold, fontSize: 20, color: colors.text, marginTop: 1, letterSpacing: -0.3 }}>
+                {username}
               </Text>
             </View>
           </View>
-        </SafeAreaView>
-      </View>
 
-      {/* Scrollable Content */}
+          <Pressable
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: 21,
+              backgroundColor: colors.surface,
+              justifyContent: 'center',
+              alignItems: 'center',
+              borderWidth: 1,
+              borderColor: colors.borderSoft,
+              ...shadow.soft,
+            }}>
+            <BellIcon size={18} color={colors.text} />
+            <View
+              style={{
+                position: 'absolute',
+                top: 10,
+                right: 10,
+                width: 8,
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: colors.brand,
+                borderWidth: 1.5,
+                borderColor: colors.surface,
+              }}
+            />
+          </Pressable>
+        </View>
+      </SafeAreaView>
+
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        style={{ marginTop: -100 }}>
-        {/* Weekly Overview Card */}
-        <View className="mx-5" style={cardStyle}>
-          <Text className="text-center font-sans text-sm" style={{ color: '#9CA3AF' }}>
-            {weekRange}
-          </Text>
-          <Text
-            className="mb-6 mt-1 text-center font-sans-semibold text-lg"
-            style={{ color: '#1F2937' }}>
-            This Week{'\u2019'}s Overview
-          </Text>
-
-          {/* Chart + Legend Row */}
-          <View className="flex-row items-center">
+        contentContainerStyle={{ paddingBottom: 140 }}>
+        {/* Streak + water stats */}
+        <View className="flex-row px-5 mb-4" style={{ gap: 10 }}>
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: colors.surface,
+              borderRadius: 18,
+              padding: 14,
+              borderWidth: 1,
+              borderColor: colors.borderSoft,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 10,
+              ...shadow.soft,
+            }}>
+            <View
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 12,
+                backgroundColor: '#FFEFE0',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <FlameIcon size={20} color={colors.brand} />
+            </View>
             <View>
+              <Text style={{ fontFamily: font.regular, fontSize: 10, color: colors.textMuted, letterSpacing: 0.5 }}>
+                STREAK
+              </Text>
+              <Text style={{ fontFamily: font.bold, fontSize: 18, color: colors.text }}>
+                {streak} days
+              </Text>
+            </View>
+          </View>
+
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: colors.surface,
+              borderRadius: 18,
+              padding: 14,
+              borderWidth: 1,
+              borderColor: colors.borderSoft,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 10,
+              ...shadow.soft,
+            }}>
+            <View
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 12,
+                backgroundColor: '#DBEAFE',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <WaterDropIcon size={18} color={colors.info} />
+            </View>
+            <View>
+              <Text style={{ fontFamily: font.regular, fontSize: 10, color: colors.textMuted, letterSpacing: 0.5 }}>
+                WATER
+              </Text>
+              <Text style={{ fontFamily: font.bold, fontSize: 18, color: colors.text }}>
+                {water.cups}/{water.goal}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Hero calorie card */}
+        <View
+          className="mx-5"
+          style={{
+            backgroundColor: colors.surface,
+            borderRadius: 28,
+            padding: 22,
+            ...shadow.card,
+            borderWidth: 1,
+            borderColor: colors.borderSoft,
+          }}>
+          <View className="flex-row items-start justify-between mb-2">
+            <View>
+              <Text style={{ fontFamily: font.regular, fontSize: 12, color: colors.textMuted, letterSpacing: 0.5 }}>
+                TODAY{'\u2019'}S INTAKE
+              </Text>
+              <Text style={{ fontFamily: font.bold, fontSize: 18, color: colors.text, marginTop: 4 }}>
+                Daily Progress
+              </Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 4,
+                backgroundColor: colors.successSoft,
+                paddingHorizontal: 10,
+                paddingVertical: 5,
+                borderRadius: 999,
+              }}>
+              <TrendUpIcon size={12} color={colors.success} />
+              <Text style={{ fontFamily: font.semibold, fontSize: 11, color: colors.success }}>
+                On track
+              </Text>
+            </View>
+          </View>
+
+          <View className="flex-row items-center mt-4">
+            {/* Ring chart */}
+            <View style={{ position: 'relative' }}>
               <PieChart
                 data={pieData}
                 donut
-                radius={70}
-                innerRadius={48}
-                innerCircleColor="white"
+                radius={74}
+                innerRadius={56}
+                innerCircleColor={colors.surface}
                 centerLabelComponent={() => (
                   <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                    <Text
-                      style={{
-                        fontFamily: 'GoogleSans-Bold',
-                        fontSize: 28,
-                        color: '#1F2937',
-                      }}>
+                    <Text style={{ fontFamily: font.bold, fontSize: 30, color: colors.text }}>
                       {totalKcal}
                     </Text>
-                    <Text
-                      style={{
-                        fontFamily: 'GoogleSans-Regular',
-                        fontSize: 13,
-                        color: '#9CA3AF',
-                        marginTop: -2,
-                      }}>
-                      kcal
+                    <Text style={{ fontFamily: font.regular, fontSize: 11, color: colors.textMuted }}>
+                      / {goalKcal} kcal
                     </Text>
                   </View>
                 )}
               />
             </View>
 
-            {/* Legend */}
-            <View className="ml-6 flex-1" style={{ gap: 14 }}>
-              <View className="flex-row items-center">
-                <View
-                  style={{
-                    width: 10,
-                    height: 10,
-                    borderRadius: 5,
-                    backgroundColor: MACRO_COLORS.protein,
-                  }}
-                />
-                <Text className="ml-2 flex-1 font-sans text-sm" style={{ color: '#6B7280' }}>
-                  Protein
-                </Text>
-                <Text className="font-sans-bold text-base" style={{ color: '#1F2937' }}>
-                  {protein.grams}g
-                </Text>
-                <Text className="ml-2 font-sans text-sm" style={{ color: '#9CA3AF' }}>
-                  {protein.percent}%
-                </Text>
-              </View>
+            {/* Macro rows */}
+            <View className="flex-1 ml-4" style={{ gap: 10 }}>
+              <MacroRow color={MACRO_COLORS.protein} label="Protein" grams={protein.grams} percent={protein.percent} />
+              <MacroRow color={MACRO_COLORS.carbs} label="Carbs" grams={carbs.grams} percent={carbs.percent} />
+              <MacroRow color={MACRO_COLORS.fats} label="Fats" grams={fats.grams} percent={fats.percent} />
+            </View>
+          </View>
 
-              <View className="flex-row items-center">
-                <View
-                  style={{
-                    width: 10,
-                    height: 10,
-                    borderRadius: 5,
-                    backgroundColor: MACRO_COLORS.carbs,
-                  }}
-                />
-                <Text className="ml-2 flex-1 font-sans text-sm" style={{ color: '#6B7280' }}>
-                  Carbs
-                </Text>
-                <Text className="font-sans-bold text-base" style={{ color: '#1F2937' }}>
-                  {carbs.grams}g
-                </Text>
-                <Text className="ml-2 font-sans text-sm" style={{ color: '#9CA3AF' }}>
-                  {carbs.percent}%
-                </Text>
-              </View>
-
-              <View className="flex-row items-center">
-                <View
-                  style={{
-                    width: 10,
-                    height: 10,
-                    borderRadius: 5,
-                    backgroundColor: MACRO_COLORS.fats,
-                  }}
-                />
-                <Text className="ml-2 flex-1 font-sans text-sm" style={{ color: '#6B7280' }}>
-                  Fats
-                </Text>
-                <Text className="font-sans-bold text-base" style={{ color: '#1F2937' }}>
-                  {fats.grams}g
-                </Text>
-                <Text className="ml-2 font-sans text-sm" style={{ color: '#9CA3AF' }}>
-                  {fats.percent}%
-                </Text>
-              </View>
+          {/* Linear goal progress */}
+          <View style={{ marginTop: 18 }}>
+            <View className="flex-row items-center justify-between mb-2">
+              <Text style={{ fontFamily: font.medium, fontSize: 12, color: colors.textMuted }}>
+                Goal progress
+              </Text>
+              <Text style={{ fontFamily: font.bold, fontSize: 12, color: colors.text }}>
+                {Math.round(progress * 100)}%
+              </Text>
+            </View>
+            <View style={{ height: 8, borderRadius: 4, backgroundColor: colors.surfaceMuted, overflow: 'hidden' }}>
+              <View
+                style={{
+                  width: `${progress * 100}%`,
+                  height: '100%',
+                  borderRadius: 4,
+                  backgroundColor: colors.brand,
+                }}
+              />
             </View>
           </View>
         </View>
 
-        {/* Daily Breakdown */}
-        <View className="relative mt-6 px-5 pb-10">
-          {/* Subtle background vector lines */}
-          <View
-            className="absolute"
-            style={{ top: 0, left: 0, right: 0, bottom: 0, opacity: 0.4 }}>
-            <VectorLine width="100%" height="100%" preserveAspectRatio="xMidYMid slice" />
-          </View>
-
-          {/* Header */}
-          <View className="mb-4 flex-row items-center justify-between">
-            <Text className="font-sans-bold text-xl" style={{ color: '#1F2937' }}>
-              Daily Breakdown
+        {/* Quick actions */}
+        <View className="mx-5" style={{ marginTop: 18 }}>
+          <View className="flex-row items-center justify-between mb-3">
+            <Text style={{ fontFamily: font.bold, fontSize: 16, color: colors.text }}>
+              Quick actions
             </Text>
-            <TrendUpIcon size={24} />
+          </View>
+          <View className="flex-row" style={{ gap: 10 }}>
+            <QuickAction
+              icon={<SparkleIcon size={18} color={colors.gold} />}
+              label="Snap meal"
+              sub="AI analysis"
+              onPress={() => router.push('/camera')}
+              tintBg="#FFF7E6"
+            />
+            <QuickAction
+              icon={<TargetIcon size={18} color={colors.brand} />}
+              label="Set goal"
+              sub="Daily target"
+              tintBg={colors.surfaceWarm}
+            />
+            <QuickAction
+              icon={<BoltIcon size={18} color="#7C3AED" />}
+              label="Insights"
+              sub="Weekly"
+              tintBg="#F3EEFF"
+            />
+          </View>
+        </View>
+
+        {/* AI insight banner */}
+        <Pressable
+          className="mx-5"
+          style={{
+            marginTop: 18,
+            borderRadius: 24,
+            ...shadow.card,
+            backgroundColor: colors.brand,
+            padding: 18,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 14,
+          }}>
+          <View
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 16,
+              backgroundColor: 'rgba(255,255,255,0.22)',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <SparkleIcon size={22} color="#fff" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontFamily: font.regular, fontSize: 11, color: 'rgba(255,255,255,0.9)', letterSpacing: 0.5 }}>
+              AI INSIGHT
+            </Text>
+            <Text style={{ fontFamily: font.bold, fontSize: 15, color: '#fff', marginTop: 2 }}>
+              You{'\u2019'}re 12% over your carbs today
+            </Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 12, color: 'rgba(255,255,255,0.9)', marginTop: 2 }}>
+              Try a lean protein snack next.
+            </Text>
+          </View>
+          <ChevronRightIcon size={18} color="#fff" />
+        </Pressable>
+
+        {/* Recent meals */}
+        <View className="mx-5" style={{ marginTop: 22 }}>
+          <View className="flex-row items-center justify-between mb-3">
+            <Text style={{ fontFamily: font.bold, fontSize: 18, color: colors.text }}>
+              Recent meals
+            </Text>
+            <Pressable>
+              <Text style={{ fontFamily: font.medium, fontSize: 13, color: colors.brand }}>
+                See all
+              </Text>
+            </Pressable>
           </View>
 
-          {/* Day Cards */}
-          <View style={{ gap: 12 }}>
-            {dailyBreakdown.map((item) => (
+          <View style={{ gap: 10 }}>
+            {recentMeals.map((item) => (
               <View
                 key={item.day}
                 style={{
-                  backgroundColor: '#FFF8F5',
-                  borderRadius: 16,
-                  padding: 16,
+                  backgroundColor: colors.surface,
+                  borderRadius: radii.lg,
+                  padding: 14,
                   flexDirection: 'row',
                   alignItems: 'center',
+                  ...shadow.soft,
+                  borderWidth: 1,
+                  borderColor: colors.borderSoft,
                 }}>
-                {/* Day Circle */}
                 <View
                   style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 24,
-                    backgroundColor: '#FFEDE6',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}>
-                  <Text
-                    style={{
-                      fontFamily: 'GoogleSans-Bold',
-                      fontSize: 13,
-                      color: '#E34F00',
-                    }}>
-                    {item.day}
-                  </Text>
-                </View>
-
-                {/* Meal Info */}
-                <View className="ml-4 flex-1">
-                  <Text className="font-sans-bold text-base" style={{ color: '#1F2937' }}>
-                    {item.meals} {item.meals === 1 ? 'Meal' : 'Meals'}
-                  </Text>
-                  <Text className="mt-1 font-sans text-sm" style={{ color: '#9CA3AF' }}>
-                    {item.kcal} kcal
-                  </Text>
-                </View>
-
-                {/* Food Image */}
-                <View
-                  style={{
-                    width: 52,
-                    height: 52,
-                    borderRadius: 26,
+                    width: 54,
+                    height: 54,
+                    borderRadius: 16,
                     overflow: 'hidden',
-                    backgroundColor: '#F3F4F6',
+                    backgroundColor: colors.surfaceMuted,
                   }}>
-                  <Image
-                    source={item.image}
-                    style={{ width: 52, height: 52 }}
-                    resizeMode="cover"
-                  />
+                  <Image source={item.image} style={{ width: 54, height: 54 }} resizeMode="cover" />
+                </View>
+                <View className="ml-3 flex-1">
+                  <Text style={{ fontFamily: font.semibold, fontSize: 14, color: colors.text }}>
+                    {item.name}
+                  </Text>
+                  <View className="flex-row items-center mt-1" style={{ gap: 6 }}>
+                    <View
+                      style={{
+                        paddingHorizontal: 8,
+                        paddingVertical: 2,
+                        borderRadius: 999,
+                        backgroundColor: colors.surfaceWarm,
+                      }}>
+                      <Text style={{ fontFamily: font.medium, fontSize: 11, color: colors.brand }}>
+                        {item.day}
+                      </Text>
+                    </View>
+                    <Text style={{ fontFamily: font.regular, fontSize: 12, color: colors.textMuted }}>
+                      {item.meals} {item.meals === 1 ? 'meal' : 'meals'}
+                    </Text>
+                  </View>
+                </View>
+                <View style={{ alignItems: 'flex-end' }}>
+                  <Text style={{ fontFamily: font.bold, fontSize: 16, color: colors.text }}>
+                    {item.kcal}
+                  </Text>
+                  <Text style={{ fontFamily: font.regular, fontSize: 11, color: colors.textMuted }}>
+                    kcal
+                  </Text>
                 </View>
               </View>
             ))}
           </View>
         </View>
-
-        {/* Bottom spacer */}
-        <View style={{ height: 40 }} />
       </ScrollView>
     </View>
+  );
+}
+
+function MacroRow({ color, label, grams, percent }: { color: string; label: string; grams: number; percent: number }) {
+  const colors = useThemeColors();
+  return (
+    <View>
+      <View className="flex-row items-center justify-between" style={{ marginBottom: 4 }}>
+        <View className="flex-row items-center" style={{ gap: 6 }}>
+          <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: color }} />
+          <Text style={{ fontFamily: font.medium, fontSize: 12, color: colors.textMuted }}>
+            {label}
+          </Text>
+        </View>
+        <Text style={{ fontFamily: font.bold, fontSize: 13, color: colors.text }}>
+          {grams}g
+        </Text>
+      </View>
+      <View style={{ height: 5, backgroundColor: colors.surfaceMuted, borderRadius: 3, overflow: 'hidden' }}>
+        <View style={{ width: `${percent}%`, height: '100%', backgroundColor: color, borderRadius: 3 }} />
+      </View>
+    </View>
+  );
+}
+
+function QuickAction({
+  icon,
+  label,
+  sub,
+  tintBg,
+  onPress,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  sub: string;
+  tintBg: string;
+  onPress?: () => void;
+}) {
+  const colors = useThemeColors();
+  return (
+    <Pressable
+      onPress={onPress}
+      style={{
+        flex: 1,
+        backgroundColor: colors.surface,
+        borderRadius: radii.lg,
+        padding: 14,
+        ...shadow.soft,
+        borderWidth: 1,
+        borderColor: colors.borderSoft,
+      }}>
+      <View
+        style={{
+          width: 38,
+          height: 38,
+          borderRadius: 12,
+          backgroundColor: tintBg,
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginBottom: 10,
+        }}>
+        {icon}
+      </View>
+      <Text style={{ fontFamily: font.bold, fontSize: 13, color: colors.text }}>{label}</Text>
+      <Text style={{ fontFamily: font.regular, fontSize: 11, color: colors.textMuted, marginTop: 2 }}>
+        {sub}
+      </Text>
+    </Pressable>
   );
 }

@@ -1,407 +1,442 @@
-import { View, Text, ScrollView, Image } from 'react-native';
+import { View, Text, ScrollView, Pressable } from 'react-native';
+import { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Path, Rect, Polyline, Line } from 'react-native-svg';
-import VectorLine from '@/assets/food/vectorLine.svg';
+import { BarChart, LineChart } from 'react-native-gifted-charts';
+import { font, radii, shadow } from '@/lib/theme';
+import { useThemeColors } from '@/lib/theme-context';
+import {
+  FlameIcon,
+  TrendUpIcon,
+  SparkleIcon,
+  TargetIcon,
+  CrownIcon,
+  BoltIcon,
+} from '@/lib/icons';
 
-// --- Inline icon components ---
+const ranges = ['Week', 'Month', 'Year'];
 
-function MealsTrackedIcon({ size = 28 }: { size?: number }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Path
-        d="M3 6h18M3 6v12a2 2 0 002 2h14a2 2 0 002-2V6M3 6l1-3h16l1 3"
-        stroke="#E34F00"
-        strokeWidth={1.6}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <Path
-        d="M8 12c0 2.2 1.8 4 4 4s4-1.8 4-4"
-        stroke="#E34F00"
-        strokeWidth={1.6}
-        strokeLinecap="round"
-      />
-    </Svg>
-  );
-}
-
-function CaloriesIcon({ size = 28 }: { size?: number }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Path
-        d="M12 2c0 4-4 6-4 10a4 4 0 008 0c0-4-4-6-4-10z"
-        stroke="#E34F00"
-        strokeWidth={1.6}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <Path
-        d="M12 18a2 2 0 002-2c0-2-2-3-2-5-0 2-2 3-2 5a2 2 0 002 2z"
-        stroke="#E34F00"
-        strokeWidth={1.4}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
-}
-
-function ActiveDaysIcon({ size = 28 }: { size?: number }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Rect
-        x={3}
-        y={4}
-        width={18}
-        height={18}
-        rx={2}
-        stroke="#E34F00"
-        strokeWidth={1.6}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <Line x1={16} y1={2} x2={16} y2={6} stroke="#E34F00" strokeWidth={1.6} strokeLinecap="round" />
-      <Line x1={8} y1={2} x2={8} y2={6} stroke="#E34F00" strokeWidth={1.6} strokeLinecap="round" />
-      <Line x1={3} y1={10} x2={21} y2={10} stroke="#E34F00" strokeWidth={1.6} />
-      <Path d="M9 15l2 2 4-4" stroke="#E34F00" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" />
-    </Svg>
-  );
-}
-
-function TrendUpIcon({ size = 24 }: { size?: number }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Polyline
-        points="23 6 13.5 15.5 8.5 10.5 1 18"
-        stroke="#16A34A"
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <Polyline
-        points="17 6 23 6 23 12"
-        stroke="#16A34A"
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
-}
-
-// --- Card style helper ---
-const cardStyle = {
-  backgroundColor: 'white',
-  borderRadius: 20,
-  padding: 24,
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.06,
-  shadowRadius: 10,
-  elevation: 3,
-};
-
-// --- Dummy data ---
-const stats = {
-  mealsTracked: 258,
-  calories: 258,
-  activeDays: 5,
-};
-
-const dailyAverages = {
-  protein: 1,
-  carbs: 11,
-  fats: 2,
-};
-
-const recentMeals = [
-  {
-    id: 1,
-    day: 'Tue',
-    kcal: 268,
-    protein: 10,
-    carbs: 74,
-    fats: 14,
-    image: require('@/assets/food/foodCenter.png'),
-  },
+const weightData = [
+  { value: 78.2 }, { value: 77.8 }, { value: 77.5 }, { value: 77.1 }, { value: 76.8 },
+  { value: 76.4 }, { value: 76.0 }, { value: 75.6 },
 ];
 
 export default function StatsScreen() {
+  const colors = useThemeColors();
+  const [range, setRange] = useState('Week');
+
+  const weeklyCalories = [
+    { value: 1820, label: 'M' },
+    { value: 2150, label: 'T' },
+    { value: 1940, label: 'W' },
+    { value: 2280, label: 'T' },
+    { value: 1780, label: 'F' },
+    { value: 2050, label: 'S' },
+    { value: 1248, label: 'S', frontColor: colors.brand },
+  ];
+
+  const avgCalories = Math.round(weeklyCalories.reduce((s, i) => s + i.value, 0) / weeklyCalories.length);
+  const avgProtein = 92;
+  const streak = 12;
+  const weightChange = -2.2;
+
   return (
-    <View className="flex-1" style={{ backgroundColor: '#F9FAFB' }}>
-      <StatusBar style="light" />
+    <View className="flex-1" style={{ backgroundColor: colors.cream }}>
+      <StatusBar style="dark" />
 
-      {/* Orange Header */}
-      <View style={{ backgroundColor: '#E34F00' }} className="relative">
-        <View className="absolute inset-0" style={{ zIndex: 0 }}>
-          <VectorLine width="100%" height="100%" preserveAspectRatio="xMidYMin slice" />
-        </View>
+      {/* Soft warm wash at the top */}
+      <View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 260,
+          backgroundColor: colors.brand,
+          opacity: 0.08,
+        }}
+      />
 
-        <SafeAreaView edges={['top']} style={{ zIndex: 1 }}>
-          <View className="px-6 pb-32 pt-4">
-            <Text className="font-sans-bold text-3xl text-white">Your Stats</Text>
-            <Text className="mt-2 font-sans text-sm" style={{ color: 'rgba(255,255,255,0.8)' }}>
-              Weekly insights and progress
-            </Text>
+      <SafeAreaView edges={['top']}>
+        <View className="px-5 pt-3 pb-4">
+          <View className="flex-row items-center justify-between">
+            <View>
+              <Text style={{ fontFamily: font.regular, fontSize: 12, color: colors.textMuted }}>
+                This week
+              </Text>
+              <Text
+                style={{
+                  fontFamily: font.bold,
+                  fontSize: 26,
+                  color: colors.text,
+                  letterSpacing: -0.5,
+                  marginTop: 2,
+                }}>
+                Your performance
+              </Text>
+            </View>
+            <View
+              style={{
+                width: 42,
+                height: 42,
+                borderRadius: 21,
+                backgroundColor: colors.surfaceWarm,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <CrownIcon size={18} color={colors.gold} />
+            </View>
           </View>
-        </SafeAreaView>
-      </View>
 
-      {/* Scrollable Content */}
+          {/* Range toggle */}
+          <View
+            style={{
+              flexDirection: 'row',
+              backgroundColor: colors.surface,
+              borderRadius: 999,
+              padding: 4,
+              marginTop: 18,
+              borderWidth: 1,
+              borderColor: colors.borderSoft,
+              ...shadow.soft,
+            }}>
+            {ranges.map((r) => {
+              const active = range === r;
+              return (
+                <Pressable
+                  key={r}
+                  onPress={() => setRange(r)}
+                  style={{
+                    flex: 1,
+                    paddingVertical: 10,
+                    borderRadius: 999,
+                    backgroundColor: active ? colors.brand : 'transparent',
+                    alignItems: 'center',
+                  }}>
+                  <Text
+                    style={{
+                      fontFamily: active ? font.bold : font.medium,
+                      fontSize: 13,
+                      color: active ? '#fff' : colors.textMuted,
+                    }}>
+                    {r}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+      </SafeAreaView>
+
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        style={{ marginTop: -100 }}>
-        {/* Summary Card */}
-        <View className="mx-5" style={cardStyle}>
-          <View className="flex-row justify-between">
-            {/* Meals Tracked */}
-            <View style={{ flex: 1, alignItems: 'center' }}>
-              <View
-                style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 14,
-                  backgroundColor: '#FFF5F0',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  marginBottom: 12,
-                }}>
-                <MealsTrackedIcon size={26} />
-              </View>
-              <Text
-                style={{
-                  fontFamily: 'GoogleSans-Bold',
-                  fontSize: 32,
-                  color: '#1F2937',
-                }}>
-                {stats.mealsTracked}
-              </Text>
-              <Text className="mt-1 font-sans text-xs" style={{ color: '#9CA3AF' }}>
-                Meals Tracked
-              </Text>
-            </View>
-
-            {/* Calories */}
-            <View style={{ flex: 1, alignItems: 'center' }}>
-              <View
-                style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 14,
-                  backgroundColor: '#FFF5F0',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  marginBottom: 12,
-                }}>
-                <CaloriesIcon size={26} />
-              </View>
-              <Text
-                style={{
-                  fontFamily: 'GoogleSans-Bold',
-                  fontSize: 32,
-                  color: '#1F2937',
-                }}>
-                {stats.calories}
-              </Text>
-              <Text className="mt-1 font-sans text-xs" style={{ color: '#9CA3AF' }}>
-                Calories
-              </Text>
-            </View>
-
-            {/* Active Days */}
-            <View style={{ flex: 1, alignItems: 'center' }}>
-              <View
-                style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 14,
-                  backgroundColor: '#FFF5F0',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  marginBottom: 12,
-                }}>
-                <ActiveDaysIcon size={26} />
-              </View>
-              <Text
-                style={{
-                  fontFamily: 'GoogleSans-Bold',
-                  fontSize: 32,
-                  color: '#1F2937',
-                }}>
-                {stats.activeDays}
-              </Text>
-              <Text className="mt-1 font-sans text-xs" style={{ color: '#9CA3AF' }}>
-                Active Days
-              </Text>
-            </View>
+        contentContainerStyle={{ paddingBottom: 140, paddingTop: 10 }}>
+        {/* KPI Grid */}
+        <View className="px-5">
+          <View className="flex-row" style={{ gap: 10, marginBottom: 10 }}>
+            <KpiCard
+              icon={<FlameIcon size={18} color={colors.brand} />}
+              tintBg="#FFEFE0"
+              label="Avg calories"
+              value={avgCalories}
+              unit="kcal/day"
+              trend="+3.2%"
+              trendColor={colors.success}
+            />
+            <KpiCard
+              icon={<BoltIcon size={18} color="#7C3AED" />}
+              tintBg="#F3EEFF"
+              label="Avg protein"
+              value={avgProtein}
+              unit="g/day"
+              trend="+8%"
+              trendColor={colors.success}
+            />
+          </View>
+          <View className="flex-row" style={{ gap: 10 }}>
+            <KpiCard
+              icon={<TargetIcon size={18} color={colors.success} />}
+              tintBg={colors.successSoft}
+              label="Streak"
+              value={streak}
+              unit="days"
+              trend="Record"
+              trendColor={colors.brand}
+            />
+            <KpiCard
+              icon={<TrendUpIcon size={18} color="#2563EB" />}
+              tintBg="#DBEAFE"
+              label="Weight"
+              value={`${weightChange}`}
+              unit="kg this month"
+              trend="On goal"
+              trendColor={colors.success}
+            />
           </View>
         </View>
 
-        {/* Daily Averages Card */}
-        <View className="mx-5 mt-5" style={cardStyle}>
-          {/* Header */}
-          <View className="mb-5 flex-row items-center justify-between">
-            <Text className="font-sans-bold text-lg" style={{ color: '#1F2937' }}>
-              Daily Averages
-            </Text>
-            <TrendUpIcon size={24} />
+        {/* Calorie bar chart */}
+        <View className="mx-5 mt-4" style={{ backgroundColor: colors.surface, borderRadius: 24, padding: 20, ...shadow.card, borderWidth: 1, borderColor: colors.borderSoft }}>
+          <View className="flex-row items-center justify-between mb-1">
+            <View>
+              <Text style={{ fontFamily: font.regular, fontSize: 11, color: colors.textMuted, letterSpacing: 0.5 }}>
+                DAILY CALORIES
+              </Text>
+              <Text style={{ fontFamily: font.bold, fontSize: 18, color: colors.text, marginTop: 2 }}>
+                This week
+              </Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 4,
+                backgroundColor: colors.successSoft,
+                paddingHorizontal: 10,
+                paddingVertical: 5,
+                borderRadius: 999,
+              }}>
+              <TrendUpIcon size={12} color={colors.success} />
+              <Text style={{ fontFamily: font.semibold, fontSize: 11, color: colors.success }}>
+                +3.2%
+              </Text>
+            </View>
           </View>
 
-          {/* Macro Cards */}
-          <View className="flex-row" style={{ gap: 12 }}>
-            {/* Protein */}
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: '#EFF6FF',
-                borderRadius: 14,
-                paddingVertical: 18,
-                alignItems: 'center',
-              }}>
-              <View
-                style={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: 5,
-                  backgroundColor: '#3B82F6',
-                  marginBottom: 8,
-                }}
-              />
-              <Text className="font-sans text-sm" style={{ color: '#6B7280' }}>
-                Protein
-              </Text>
-              <Text
-                style={{
-                  fontFamily: 'GoogleSans-Bold',
-                  fontSize: 22,
-                  color: '#1F2937',
-                  marginTop: 4,
-                }}>
-                {dailyAverages.protein}g
-              </Text>
-            </View>
-
-            {/* Carbs */}
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: '#FFFBEB',
-                borderRadius: 14,
-                paddingVertical: 18,
-                alignItems: 'center',
-              }}>
-              <View
-                style={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: 5,
-                  backgroundColor: '#F59E0B',
-                  marginBottom: 8,
-                }}
-              />
-              <Text className="font-sans text-sm" style={{ color: '#6B7280' }}>
-                Carbs
-              </Text>
-              <Text
-                style={{
-                  fontFamily: 'GoogleSans-Bold',
-                  fontSize: 22,
-                  color: '#1F2937',
-                  marginTop: 4,
-                }}>
-                {dailyAverages.carbs}g
-              </Text>
-            </View>
-
-            {/* Fats */}
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: '#FFF1F2',
-                borderRadius: 14,
-                paddingVertical: 18,
-                alignItems: 'center',
-              }}>
-              <View
-                style={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: 5,
-                  backgroundColor: '#EF4444',
-                  marginBottom: 8,
-                }}
-              />
-              <Text className="font-sans text-sm" style={{ color: '#6B7280' }}>
-                Fats
-              </Text>
-              <Text
-                style={{
-                  fontFamily: 'GoogleSans-Bold',
-                  fontSize: 22,
-                  color: '#1F2937',
-                  marginTop: 4,
-                }}>
-                {dailyAverages.fats}g
-              </Text>
-            </View>
+          <View style={{ marginTop: 12 }}>
+            <BarChart
+              data={weeklyCalories}
+              barWidth={18}
+              barBorderRadius={6}
+              frontColor={colors.espresso}
+              yAxisTextStyle={{ color: colors.textSubtle, fontSize: 10 }}
+              xAxisLabelTextStyle={{ color: colors.textMuted, fontSize: 11, fontFamily: font.medium }}
+              noOfSections={4}
+              maxValue={2500}
+              yAxisThickness={0}
+              xAxisThickness={0}
+              rulesType="solid"
+              rulesColor={colors.borderSoft}
+              spacing={18}
+              height={160}
+              disableScroll
+            />
           </View>
         </View>
 
-        {/* Recent Meals Card */}
-        <View className="mx-5 mb-8 mt-5" style={cardStyle}>
-          <Text className="mb-5 font-sans-bold text-lg" style={{ color: '#1F2937' }}>
-            Recent Meals
+        {/* Weight line chart */}
+        <View className="mx-5 mt-4" style={{ backgroundColor: colors.surface, borderRadius: 24, padding: 20, ...shadow.card, borderWidth: 1, borderColor: colors.borderSoft }}>
+          <View className="flex-row items-center justify-between mb-2">
+            <View>
+              <Text style={{ fontFamily: font.regular, fontSize: 11, color: colors.textMuted, letterSpacing: 0.5 }}>
+                WEIGHT PROGRESS
+              </Text>
+              <Text style={{ fontFamily: font.bold, fontSize: 18, color: colors.text, marginTop: 2 }}>
+                75.6 kg
+              </Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 4,
+                backgroundColor: colors.successSoft,
+                paddingHorizontal: 10,
+                paddingVertical: 5,
+                borderRadius: 999,
+              }}>
+              <Text style={{ fontFamily: font.semibold, fontSize: 11, color: colors.success }}>
+                -2.6 kg
+              </Text>
+            </View>
+          </View>
+
+          <LineChart
+            data={weightData}
+            color={colors.brand}
+            thickness={3}
+            curved
+            startFillColor={colors.brand}
+            endFillColor="#FFFFFF"
+            startOpacity={0.3}
+            endOpacity={0.02}
+            areaChart
+            hideRules
+            hideDataPoints={false}
+            dataPointsColor={colors.brand}
+            dataPointsRadius={4}
+            yAxisTextStyle={{ color: colors.textSubtle, fontSize: 10 }}
+            xAxisColor={colors.borderSoft}
+            yAxisColor={colors.borderSoft}
+            height={140}
+            initialSpacing={10}
+            spacing={38}
+            noOfSections={4}
+            disableScroll
+          />
+        </View>
+
+        {/* Achievements */}
+        <View className="mx-5 mt-4">
+          <Text style={{ fontFamily: font.bold, fontSize: 16, color: colors.text, marginBottom: 10 }}>
+            Achievements
           </Text>
-
-          {recentMeals.map((meal) => (
-            <View key={meal.id} className="flex-row items-center">
-              {/* Food Image */}
-              <View
-                style={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: 28,
-                  overflow: 'hidden',
-                  backgroundColor: '#F3F4F6',
-                }}>
-                <Image
-                  source={meal.image}
-                  style={{ width: 56, height: 56 }}
-                  resizeMode="cover"
-                />
-              </View>
-
-              {/* Day + Calories */}
-              <View className="ml-4 flex-1">
-                <Text className="font-sans-bold text-base" style={{ color: '#1F2937' }}>
-                  {meal.day}
-                </Text>
-                <Text className="mt-1 font-sans text-sm" style={{ color: '#9CA3AF' }}>
-                  {meal.kcal} kcal
-                </Text>
-              </View>
-
-              {/* Macro Breakdown */}
-              <View style={{ alignItems: 'flex-end' }}>
-                <Text className="font-sans text-sm" style={{ color: '#6B7280' }}>
-                  P: {meal.protein}g
-                </Text>
-                <Text className="font-sans text-sm" style={{ color: '#6B7280' }}>
-                  C: {meal.carbs}g
-                </Text>
-                <Text className="font-sans text-sm" style={{ color: '#6B7280' }}>
-                  F: {meal.fats}g
-                </Text>
-              </View>
-            </View>
-          ))}
+          <View className="flex-row flex-wrap" style={{ gap: 10 }}>
+            <AchievementCard title="12 day streak" sub="Consistency king" icon={'\u{1F525}'} accent={colors.brand} />
+            <AchievementCard title="Protein pro" sub="92g average" icon={'\u{1F4AA}'} accent={colors.info} />
+            <AchievementCard title="Hydration hero" sub="8 cups a day" icon={'\u{1F4A7}'} accent={colors.success} />
+            <AchievementCard title="Goal crusher" sub="-2.6 kg" icon={'\u{1F3C6}'} accent={colors.gold} />
+          </View>
         </View>
 
-        {/* Bottom spacer for tab bar */}
-        <View style={{ height: 40 }} />
+        {/* AI summary */}
+        <View
+          className="mx-5 mt-5"
+          style={{
+            borderRadius: 24,
+            overflow: 'hidden',
+            ...shadow.card,
+            backgroundColor: colors.espresso,
+            padding: 20,
+          }}>
+          <View className="flex-row items-center" style={{ gap: 10, marginBottom: 10 }}>
+              <View
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 12,
+                  backgroundColor: 'rgba(201, 169, 89, 0.25)',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <SparkleIcon size={18} color={colors.goldLight} />
+              </View>
+              <Text
+                style={{
+                  fontFamily: font.regular,
+                  fontSize: 11,
+                  color: 'rgba(255,255,255,0.6)',
+                  letterSpacing: 1,
+                }}>
+                WEEKLY AI SUMMARY
+              </Text>
+            </View>
+            <Text
+              style={{
+                fontFamily: font.bold,
+                fontSize: 18,
+                color: '#fff',
+                lineHeight: 26,
+                letterSpacing: -0.2,
+              }}>
+              Your protein intake is up 8% — muscle recovery windows are hitting consistently.
+              Keep carbs moderate and you{'\u2019'}ll see another 1 kg by next week.
+            </Text>
+        </View>
       </ScrollView>
+    </View>
+  );
+}
+
+function KpiCard({
+  icon,
+  tintBg,
+  label,
+  value,
+  unit,
+  trend,
+  trendColor,
+}: {
+  icon: React.ReactNode;
+  tintBg: string;
+  label: string;
+  value: string | number;
+  unit: string;
+  trend: string;
+  trendColor: string;
+}) {
+  const colors = useThemeColors();
+  return (
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: colors.surface,
+        borderRadius: 20,
+        padding: 14,
+        ...shadow.soft,
+        borderWidth: 1,
+        borderColor: colors.borderSoft,
+      }}>
+      <View className="flex-row items-center justify-between mb-2">
+        <View
+          style={{
+            width: 34,
+            height: 34,
+            borderRadius: 12,
+            backgroundColor: tintBg,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          {icon}
+        </View>
+        <Text style={{ fontFamily: font.semibold, fontSize: 10, color: trendColor }}>
+          {trend}
+        </Text>
+      </View>
+      <Text style={{ fontFamily: font.regular, fontSize: 11, color: colors.textMuted, marginTop: 4 }}>
+        {label}
+      </Text>
+      <Text style={{ fontFamily: font.bold, fontSize: 22, color: colors.text, marginTop: 2, letterSpacing: -0.5 }}>
+        {value}
+      </Text>
+      <Text style={{ fontFamily: font.regular, fontSize: 10, color: colors.textSubtle }}>
+        {unit}
+      </Text>
+    </View>
+  );
+}
+
+function AchievementCard({
+  title,
+  sub,
+  icon,
+  accent,
+}: {
+  title: string;
+  sub: string;
+  icon: string;
+  accent: string;
+}) {
+  const colors = useThemeColors();
+  return (
+    <View
+      style={{
+        flexBasis: '48%',
+        backgroundColor: colors.surface,
+        borderRadius: radii.lg,
+        padding: 14,
+        ...shadow.soft,
+        borderWidth: 1,
+        borderColor: colors.borderSoft,
+      }}>
+      <View
+        style={{
+          width: 40,
+          height: 40,
+          borderRadius: 12,
+          backgroundColor: accent + '20',
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginBottom: 10,
+        }}>
+        <Text style={{ fontSize: 20 }}>{icon}</Text>
+      </View>
+      <Text style={{ fontFamily: font.bold, fontSize: 13, color: colors.text }}>{title}</Text>
+      <Text style={{ fontFamily: font.regular, fontSize: 11, color: colors.textMuted, marginTop: 2 }}>
+        {sub}
+      </Text>
     </View>
   );
 }
