@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
+import VectorLine from '@/assets/food/vectorLine.svg';
 import Avatar1 from '@/assets/food/avatar1.svg';
 import Avatar3 from '@/assets/food/avatar3.svg';
 import Avatar4 from '@/assets/food/avatar4.svg';
@@ -31,9 +32,7 @@ export default function AvatarSelectionScreen() {
   const [nickname, setNickname] = useState('');
 
   const handleGetStarted = () => {
-    // Navigation logic will go here
-    console.log('Selected Avatar:', selectedAvatar);
-    console.log('Nickname:', nickname);
+    router.replace('/(tabs)');
   };
 
   return (
@@ -41,27 +40,37 @@ export default function AvatarSelectionScreen() {
       <StatusBar style="light" />
 
       {/* Orange Header */}
-      <View style={{ backgroundColor: '#E34F00' }} className="pt-2">
-        <SafeAreaView edges={['top']}>
-          <View className="px-6 pb-8">
+      <View style={{ backgroundColor: '#E34F00' }} className="relative pt-2">
+        {/* Background Vector Lines */}
+        <View className="absolute inset-0" style={{ zIndex: 0 }}>
+          <VectorLine width="100%" height="100%" preserveAspectRatio="xMidYMin slice" />
+        </View>
+
+        <SafeAreaView edges={['top']} style={{ zIndex: 1 }}>
+          <View className="px-6 pb-12">
             <Text className="mb-4 text-center font-sans-bold text-3xl text-white">Nutri-Snap</Text>
             <Text className="text-center font-sans-semibold text-2xl text-white">
-              Let's know you
+              Let{'\u2019'}s know you
             </Text>
           </View>
         </SafeAreaView>
       </View>
 
-      {/* White Content Area */}
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        style={{
+          marginTop: -24,
+          borderTopLeftRadius: 24,
+          borderTopRightRadius: 24,
+          backgroundColor: 'white',
+        }}>
         <View className="px-6 py-8">
-          {/* Select Avatar Title */}
           <Text className="mb-6 text-center font-sans-medium text-base text-gray-600">
             Select Avatar
           </Text>
 
-          {/* Avatar Grid */}
-          <View className="mb-8 flex-row flex-wrap justify-center gap-4">
+          <View className="mb-8 flex-row flex-wrap justify-center gap-5">
             {avatars.map((avatar) => {
               const AvatarComponent = avatar.Component;
               const isSelected = selectedAvatar === avatar.id;
@@ -71,22 +80,20 @@ export default function AvatarSelectionScreen() {
                   key={avatar.id}
                   onPress={() => setSelectedAvatar(avatar.id)}
                   className="relative">
-                  {/* Avatar Circle */}
                   <View
                     style={{
-                      width: 90,
-                      height: 90,
-                      borderRadius: 45,
+                      width: 100,
+                      height: 100,
+                      borderRadius: 50,
                       backgroundColor: '#FFE5D9',
                       justifyContent: 'center',
                       alignItems: 'center',
                       borderWidth: isSelected ? 3 : 0,
                       borderColor: isSelected ? '#840404' : 'transparent',
                     }}>
-                    <AvatarComponent width={80} height={80} />
+                    <AvatarComponent width={90} height={90} />
                   </View>
 
-                  {/* Checkmark for selected avatar */}
                   {isSelected && (
                     <View
                       style={{
@@ -111,7 +118,7 @@ export default function AvatarSelectionScreen() {
           </View>
 
           {/* Nickname Input */}
-          <View className="mb-8">
+          <View>
             <TextInput
               value={nickname}
               onChangeText={setNickname}
@@ -121,21 +128,35 @@ export default function AvatarSelectionScreen() {
               style={{ backgroundColor: 'white' }}
             />
           </View>
+        </View>
+      </ScrollView>
 
-          {/* Get Started Button */}
+      {/* Get Started Button - Pinned to bottom */}
+      <SafeAreaView edges={['bottom']} style={{ backgroundColor: 'white' }}>
+        <View className="px-6 pb-4 pt-4">
           <Pressable
             onPress={handleGetStarted}
-            className="overflow-hidden rounded-lg active:opacity-90">
+            className="overflow-hidden rounded-2xl active:opacity-90"
+            style={{
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 8,
+            }}>
             <LinearGradient
-              colors={['#840404', '#5C0303']}
+              colors={['#A01F1F', '#6B0F0F']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
-              className="items-center py-5">
-              <Text className="font-sans-bold text-lg text-white">Get started</Text>
+              style={{ borderRadius: 16 }}
+              className="items-center justify-center py-5">
+              <Text className="py-4 text-center font-sans-bold text-lg text-white">
+                Get Started
+              </Text>
             </LinearGradient>
           </Pressable>
         </View>
-      </ScrollView>
+      </SafeAreaView>
     </View>
   );
 }

@@ -14,7 +14,19 @@
     "plugins": [
       "expo-router",
       "expo-font",
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow NutriSnap to access your camera to photograph your meals."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow NutriSnap to access your photos to select meal images."
+        }
+      ]
     ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",

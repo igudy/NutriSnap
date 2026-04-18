@@ -42,6 +42,15 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="(auth)/index" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)/avatar-selection" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="camera"
+          options={{ headerShown: false, presentation: 'fullScreenModal', animation: 'slide_from_bottom' }}
+        />
+        <Stack.Screen
+          name="analysis"
+          options={{ headerShown: false, animation: 'slide_from_right' }}
+        />
       </Stack>
     </ThemeProvider>
   );
