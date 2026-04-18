@@ -41,7 +41,7 @@ export default function ProfileScreen() {
       />
 
       <SafeAreaView edges={['top']}>
-        <View className="px-5 pt-3 pb-5">
+        <View className="px-5 pb-5 pt-3">
           <View className="flex-row items-center justify-between">
             <Text style={{ fontFamily: font.regular, fontSize: 12, color: colors.textMuted }}>
               Account
@@ -62,7 +62,7 @@ export default function ProfileScreen() {
             </Pressable>
           </View>
 
-          <View className="flex-row items-center mt-5" style={{ gap: 14 }}>
+          <View className="mt-5 flex-row items-center" style={{ gap: 14 }}>
             <View
               style={{
                 width: 76,
@@ -76,7 +76,13 @@ export default function ProfileScreen() {
             </View>
             <View style={{ flex: 1 }}>
               <View className="flex-row items-center" style={{ gap: 8 }}>
-                <Text style={{ fontFamily: font.bold, fontSize: 22, color: colors.text, letterSpacing: -0.5 }}>
+                <Text
+                  style={{
+                    fontFamily: font.bold,
+                    fontSize: 22,
+                    color: colors.text,
+                    letterSpacing: -0.5,
+                  }}>
                   Meeday
                 </Text>
                 <View
@@ -90,15 +96,27 @@ export default function ProfileScreen() {
                     borderRadius: 999,
                   }}>
                   <CrownIcon size={12} color={colors.gold} />
-                  <Text style={{ fontFamily: font.bold, fontSize: 10, color: colors.gold, letterSpacing: 0.5 }}>
+                  <Text
+                    style={{
+                      fontFamily: font.bold,
+                      fontSize: 10,
+                      color: colors.gold,
+                      letterSpacing: 0.5,
+                    }}>
                     PRO
                   </Text>
                 </View>
               </View>
-              <Text style={{ fontFamily: font.regular, fontSize: 13, color: colors.textMuted, marginTop: 2 }}>
+              <Text
+                style={{
+                  fontFamily: font.regular,
+                  fontSize: 13,
+                  color: colors.textMuted,
+                  marginTop: 2,
+                }}>
                 meeday@nutrisnap.ai
               </Text>
-              <View className="flex-row items-center mt-2" style={{ gap: 4 }}>
+              <View className="mt-2 flex-row items-center" style={{ gap: 4 }}>
                 <FlameIcon size={12} color={colors.brand} />
                 <Text style={{ fontFamily: font.semibold, fontSize: 12, color: colors.text }}>
                   12 day streak
@@ -254,6 +272,7 @@ export default function ProfileScreen() {
         </SectionCard>
 
         <Pressable
+          onPress={() => router.replace('/(auth)')}
           className="mx-5 mt-5"
           style={{
             backgroundColor: colors.surface,
@@ -268,16 +287,27 @@ export default function ProfileScreen() {
           </Text>
         </Pressable>
 
-        <Text
-          style={{
-            fontFamily: font.regular,
-            fontSize: 11,
-            color: colors.textSubtle,
-            textAlign: 'center',
-            marginTop: 16,
-          }}>
-          v1.0.0 {'\u00B7'} Built with {'\u2665'} in Lagos
-        </Text>
+        <View style={{ alignItems: 'center', marginTop: 24, gap: 4 }}>
+          <Text
+            style={{
+              fontFamily: font.semibold,
+              fontSize: 11,
+              color: colors.textSubtle,
+              letterSpacing: 0.6,
+              textTransform: 'uppercase',
+            }}>
+            NutriSnap {'\u2022'} v1.0.0
+          </Text>
+          <Text
+            style={{
+              fontFamily: font.regular,
+              fontSize: 11,
+              color: colors.textSubtle,
+              textAlign: 'center',
+            }}>
+            Crafted with {'\u2665'} by Igudy {'\u00B7'} Designed by Meeday
+          </Text>
+        </View>
       </ScrollView>
     </View>
   );
@@ -287,10 +317,17 @@ function StatBlock({ label, value, accent }: { label: string; value: string; acc
   const colors = useThemeColors();
   return (
     <View style={{ flex: 1, alignItems: 'center' }}>
-      <Text style={{ fontFamily: font.bold, fontSize: 20, color: accent ?? colors.text, letterSpacing: -0.5 }}>
+      <Text
+        style={{
+          fontFamily: font.bold,
+          fontSize: 20,
+          color: accent ?? colors.text,
+          letterSpacing: -0.5,
+        }}>
         {value}
       </Text>
-      <Text style={{ fontFamily: font.regular, fontSize: 11, color: colors.textMuted, marginTop: 2 }}>
+      <Text
+        style={{ fontFamily: font.regular, fontSize: 11, color: colors.textMuted, marginTop: 2 }}>
         {label}
       </Text>
     </View>
@@ -299,7 +336,16 @@ function StatBlock({ label, value, accent }: { label: string; value: string; acc
 
 function Divider() {
   const colors = useThemeColors();
-  return <View style={{ width: 1, alignSelf: 'stretch', backgroundColor: colors.borderSoft, marginHorizontal: 6 }} />;
+  return (
+    <View
+      style={{
+        width: 1,
+        alignSelf: 'stretch',
+        backgroundColor: colors.borderSoft,
+        marginHorizontal: 6,
+      }}
+    />
+  );
 }
 
 function SectionHeader({ title }: { title: string }) {
@@ -353,7 +399,14 @@ function Row({
 }) {
   const colors = useThemeColors();
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 16, gap: 12 }}>
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 14,
+        paddingHorizontal: 16,
+        gap: 12,
+      }}>
       {icon ? (
         <View
           style={{

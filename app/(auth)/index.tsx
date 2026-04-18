@@ -25,7 +25,15 @@ const slides = [
   { id: 'right', image: require('@/assets/food/foodRight.png') },
 ];
 
-const INITIAL_INDEX = 1;
+const SET_LENGTH = slides.length;
+
+// Triple the slides so we can silently wrap the scroll position while the user sees a seamless loop.
+const LOOPED_SLIDES = [0, 1, 2].flatMap((set) =>
+  slides.map((s, i) => ({ ...s, _key: `${set}-${i}` }))
+);
+
+// Start in the middle set, on the bowl (middle slide) so neighbours peek on both sides.
+const INITIAL_INDEX = SET_LENGTH + 1;
 
 const CARD_WIDTH = Math.round(width * 0.62);
 const SPACING = Math.round(width * 0.06);
@@ -35,7 +43,7 @@ const SIDE_PADDING = (width - CARD_WIDTH) / 2;
 export default function LandingScreen() {
   const router = useRouter();
   const colors = useThemeColors();
-  const [active, setActive] = useState(INITIAL_INDEX);
+  const [active, setActive] = useState(INITIAL_INDEX % SET_LENGTH);
   const scrollRef = useRef<any>(null);
   const scrollX = useRef(new Animated.Value(INITIAL_INDEX * ITEM_SIZE)).current;
 
@@ -45,7 +53,18 @@ export default function LandingScreen() {
 
   const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const page = Math.round(e.nativeEvent.contentOffset.x / ITEM_SIZE);
-    if (page !== active) setActive(page);
+    const dot = ((page % SET_LENGTH) + SET_LENGTH) % SET_LENGTH;
+    if (dot !== active) setActive(dot);
+  };
+
+  const handleMomentumEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const x = e.nativeEvent.contentOffset.x;
+    const page = Math.round(x / ITEM_SIZE);
+    if (page < SET_LENGTH) {
+      scrollRef.current?.scrollTo({ x: (page + SET_LENGTH) * ITEM_SIZE, animated: false });
+    } else if (page >= SET_LENGTH * 2) {
+      scrollRef.current?.scrollTo({ x: (page - SET_LENGTH) * ITEM_SIZE, animated: false });
+    }
   };
 
   return (
@@ -79,16 +98,18 @@ export default function LandingScreen() {
             showsHorizontalScrollIndicator={false}
             snapToInterval={ITEM_SIZE}
             decelerationRate="fast"
+            contentOffset={{ x: INITIAL_INDEX * ITEM_SIZE, y: 0 }}
             onScroll={Animated.event(
               [{ nativeEvent: { contentOffset: { x: scrollX } } }],
               { useNativeDriver: true, listener: handleScroll }
             )}
+            onMomentumScrollEnd={handleMomentumEnd}
             scrollEventThrottle={16}
             contentContainerStyle={{
               paddingHorizontal: SIDE_PADDING,
               paddingVertical: 12,
             }}>
-            {slides.map((s, i) => {
+            {LOOPED_SLIDES.map((s, i) => {
               const inputRange = [
                 (i - 1) * ITEM_SIZE,
                 i * ITEM_SIZE,
@@ -117,7 +138,7 @@ export default function LandingScreen() {
 
               return (
                 <Animated.View
-                  key={s.id}
+                  key={s._key}
                   style={{
                     width: CARD_WIDTH,
                     marginHorizontal: SPACING / 2,
@@ -165,7 +186,12 @@ export default function LandingScreen() {
               return (
                 <Pressable
                   key={i}
-                  onPress={() => scrollRef.current?.scrollTo({ x: i * ITEM_SIZE, animated: true })}
+                  onPress={() =>
+                    scrollRef.current?.scrollTo({
+                      x: (SET_LENGTH + i) * ITEM_SIZE,
+                      animated: true,
+                    })
+                  }
                   style={{
                     width: isActive ? 22 : 6,
                     height: 6,
@@ -224,7 +250,7 @@ export default function LandingScreen() {
             onPress={handleGetStarted}
             style={{
               borderRadius: radii.lg,
-              backgroundColor: colors.brandDeep,
+              backgroundColor: colors.espresso,
               paddingVertical: 20,
               alignItems: 'center',
               ...shadow.deep,

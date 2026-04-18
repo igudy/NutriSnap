@@ -1,8 +1,8 @@
 export const lightColors = {
-  brand: '#FF7A2E',
-  brandDark: '#E34F00',
-  brandLight: '#FFB885',
-  brandDeep: '#B83A00',
+  brand: '#EC6520',
+  brandDark: '#C94D10',
+  brandLight: '#FFA56B',
+  brandDeep: '#A33A04',
 
   espresso: '#1C0F07',
   ink: '#0F0A06',
@@ -36,10 +36,10 @@ export const lightColors = {
 };
 
 export const darkColors: typeof lightColors = {
-  brand: '#FF9557',
-  brandDark: '#FF7A2E',
-  brandLight: '#FFC89E',
-  brandDeep: '#E34F00',
+  brand: '#F07A2F',
+  brandDark: '#EC6520',
+  brandLight: '#FFB585',
+  brandDeep: '#C94D10',
 
   // Hero / tab bar / dark accent surfaces — visibly elevated above pure-black body
   espresso: '#140D08',
@@ -111,7 +111,7 @@ export const shadow = {
     elevation: 2,
   },
   brand: {
-    shadowColor: '#FF7A2E',
+    shadowColor: '#EC6520',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.32,
     shadowRadius: 18,
